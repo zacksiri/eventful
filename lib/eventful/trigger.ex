@@ -1,9 +1,9 @@
 defmodule Eventful.Trigger do
-  defmacro __using__(_) do
+  defmacro __using__(options \\ []) do
     quote do
-      import Station.Events.Trigger
+      import Eventful.Trigger
 
-      @state_field :current_state
+      @eventful_state Keyword.get(unquote(options), :eventful_state, :current_state)
     end
   end
 
@@ -13,7 +13,7 @@ defmodule Eventful.Trigger do
     quote do
       def call(_repo, %{
             event: %unquote(module).Event{} = event,
-            resource: %unquote(module){@state_field => unquote(current_state)} = resource
+            resource: %unquote(module){@eventful_state => unquote(current_state)} = resource
           }),
           do: unquote(fun).(event, resource)
     end
