@@ -1,0 +1,82 @@
+defmodule Eventful.Events do
+  @moduledoc """
+  Sets up Event Tracking Schema
+  """
+
+  defmacro __using__(options) do
+    caller = __CALLER__.module
+    module = Keyword.get(options, :module)
+    parent = Keyword.get(options, :parent)
+
+    quote do
+      use Ecto.Schema
+      import Ecto.Changeset
+      import Station.Events
+
+      alias Station.Members
+
+      @primary_key {:id, :binary_id, autogenerate: true}
+      @foreign_key_type :binary_id
+      schema "#{unquote(parent)}_events" do
+        belongs_to(unquote(parent), unquote(module))
+        belongs_to(:employment, Members.Employment)
+
+        field(:domain, :string)
+        field(:metadata, :map, default: %{})
+        field(:name, :string)
+
+        timestamps(type: :utc_datetime_usec)
+      end
+
+      @doc false
+      def changeset(%unquote(caller){} = event, attrs) do
+        event
+        |> cast(attrs, [:name, :domain, :metadata])
+        |> cast_assoc(unquote(parent))
+        |> cast_assoc(:employment)
+        |> validate_required([:name, :domain, unquote(parent), :employment])
+      end
+
+      def with_metadata(
+            %{changes: changes} = resource_changeset,
+            employment,
+            resource,
+            %{name: name, domain: domain} = _params
+          ) do
+        event = %unquote(caller){
+          :employment => employment,
+          unquote(parent) => resource
+        }
+
+        {resource_changeset,
+         changeset(event, %{
+           domain: domain,
+           name: name,
+           metadata:
+             Enum.reduce(changes, %{}, fn {key, value}, acc ->
+               Map.merge(acc, %{
+                 key => %{from: Map.get(resource, key), to: value}
+               })
+             end)
+         })}
+      end
+    end
+  end
+
+  defmacro handle(domain, options) do
+    using = Keyword.get(options, :using)
+    string_domain = Atom.to_string(domain)
+
+    quote do
+      def handle(
+            resource,
+            user,
+            %{domain: unquote(string_domain)} = event_params
+          ) do
+        unquote(using).call(user, resource, event_params)
+      rescue
+        FunctionClauseError -> {:error, :invalid_transition_event}
+      end
+    end
+  end
+end
