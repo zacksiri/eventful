@@ -9,6 +9,7 @@ defmodule Eventful.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      package: package(),
       deps: deps()
     ]
   end
@@ -17,6 +18,16 @@ defmodule Eventful.MixProject do
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  defp package do
+    [
+      description: "Provide Event tracking for your Ecto Model",
+      files: ["lib", "mix.exs", "README*"],
+      maintainers: ["Zack Siri"],
+      licenses: ["MIT"],
+      links: %{github: "https://github.com/zacksiri/eventful"}
     ]
   end
 
