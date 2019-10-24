@@ -29,7 +29,7 @@ end
 # migration
 
 alter table(:posts) do
-  field :current_state, :string, default: "draft, null: false
+  field :current_state, :string, default: "draft", null: false
 end
 ```
 
