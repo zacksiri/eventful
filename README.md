@@ -57,7 +57,7 @@ end
 Generate a migration file for your events like this.
 
 ```elixir
-defmodule MyApp.Repo.Migrations.CreateModelEvents do
+defmodule MyApp.Repo.Migrations.CreatePostEvents do
   use Ecto.Migration
 
   def change do
