@@ -5,8 +5,8 @@ config :eventful, Eventful.Test.Repo,
   database: "eventful_test",
   pool: Ecto.Adapters.SQL.Sandbox,
   hostname: System.get_env("POSTGRES_HOST") || "localhost",
-  username: System.get_env("POSTGRES_USERNAME") || "postgres",
-  password: System.get_env("POSTGRES_PASSWORD") || "postgres",
+  username: System.get_env("POSTGRES_USERNAME") || "zacksiri",
+  password: System.get_env("POSTGRES_PASSWORD") || "",
   priv: "test/support/"
 
 config :eventful,

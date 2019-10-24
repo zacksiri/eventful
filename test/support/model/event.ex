@@ -3,7 +3,7 @@ defmodule Eventful.Test.Model.Event do
     Model, Actor
   }
 
-  use Eventful.Events,
+  use Eventful,
     parent: {:model, Model},
     actor: {:actor, Actor}
 
