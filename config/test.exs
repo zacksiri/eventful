@@ -4,7 +4,7 @@ config :eventful, Eventful.Test.Repo,
   adapter: Ecto.Adapters.Postgres,
   database: "eventful_test",
   pool: Ecto.Adapters.SQL.Sandbox,
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST") || "localhost",
   priv: "test/support/"
 
 config :eventful,
