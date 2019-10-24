@@ -5,6 +5,7 @@ defmodule Eventful.Events do
 
   defmacro __using__(options) do
     caller = __CALLER__.module
+    binary_id = Keyword.get(options, :binary_id)
     {parent_relation, parent_module} = Keyword.get(options, :parent)
     {actor_relation, actor_module} = Keyword.get(options, :actor)
 
@@ -13,8 +14,11 @@ defmodule Eventful.Events do
       import Ecto.Changeset
       import Eventful.Events
 
-      @primary_key {:id, :binary_id, autogenerate: true}
-      @foreign_key_type :binary_id
+      if unquote(binary_id) do
+        @primary_key {:id, :binary_id, autogenerate: true}
+        @foreign_key_type :binary_id
+      end
+
       schema "#{unquote(parent_relation)}_events" do
         belongs_to(unquote(parent_relation), unquote(parent_module))
         belongs_to(unquote(actor_relation), unquote(actor_module))
