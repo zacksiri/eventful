@@ -33,4 +33,5 @@ jobs:
         run: mix test
         env:
           POSTGRES_HOST: postgres
+          POSTGRES_USERNAME: postgres
           POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
