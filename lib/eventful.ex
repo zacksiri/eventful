@@ -36,14 +36,19 @@ defmodule Eventful do
         |> cast(attrs, [:name, :domain, :metadata])
         |> cast_assoc(unquote(parent_relation))
         |> cast_assoc(unquote(actor_relation))
-        |> validate_required([:name, :domain, unquote(parent_relation), unquote(actor_relation)])
+        |> validate_required([
+          :name,
+          :domain,
+          unquote(parent_relation),
+          unquote(actor_relation)
+        ])
       end
 
       def with_metadata(
             %{changes: changes} = resource_changeset,
             actor,
             resource,
-            %{name: name, domain: domain} = _params
+            %{name: name, domain: domain} = params
           ) do
         event = %unquote(caller){
           unquote(actor_relation) => actor,
@@ -54,12 +59,7 @@ defmodule Eventful do
          changeset(event, %{
            domain: domain,
            name: name,
-           metadata:
-             Enum.reduce(changes, %{}, fn {key, value}, acc ->
-               Map.merge(acc, %{
-                 key => %{from: Map.get(resource, key), to: value}
-               })
-             end)
+           metadata: Eventful.Metadata.build(resource, changes, params)
          })}
       end
     end

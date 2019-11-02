@@ -3,7 +3,11 @@ defmodule Eventful.Trigger do
     quote do
       import Eventful.Trigger
 
-      @eventful_state Keyword.get(unquote(options), :eventful_state, :current_state)
+      @eventful_state Keyword.get(
+                        unquote(options),
+                        :eventful_state,
+                        :current_state
+                      )
     end
   end
 
@@ -13,7 +17,9 @@ defmodule Eventful.Trigger do
     quote do
       def call(_repo, %{
             event: %unquote(module).Event{} = event,
-            resource: %unquote(module){@eventful_state => unquote(current_state)} = resource
+            resource:
+              %unquote(module){@eventful_state => unquote(current_state)} =
+                resource
           }),
           do: unquote(fun).(event, resource)
     end

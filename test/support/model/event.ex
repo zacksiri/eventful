@@ -1,6 +1,7 @@
 defmodule Eventful.Test.Model.Event do
   alias Eventful.Test.{
-    Model, Actor
+    Model,
+    Actor
   }
 
   use Eventful,

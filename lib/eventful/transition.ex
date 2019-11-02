@@ -10,7 +10,11 @@ defmodule Eventful.Transition do
 
       import Eventful.Transition
 
-      @eventful_state Keyword.get(unquote(options), :eventful_state, :current_state)
+      @eventful_state Keyword.get(
+                        unquote(options),
+                        :eventful_state,
+                        :current_state
+                      )
 
       @spec call(struct, map(), map()) ::
               {:ok, any}
@@ -21,7 +25,8 @@ defmodule Eventful.Transition do
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}) ::
               {:ok, any()}
               | {:error, any()}
-              | {:error, Ecto.Multi.name(), any(), %{required(Ecto.Multi.name()) => any()}}
+              | {:error, Ecto.Multi.name(), any(),
+                 %{required(Ecto.Multi.name()) => any()}}
       def transit({changeset, event_changeset}) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
@@ -32,7 +37,8 @@ defmodule Eventful.Transition do
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}, atom) ::
               {:ok, any()}
               | {:error, any()}
-              | {:error, Ecto.Multi.name(), any(), %{required(Ecto.Multi.name()) => any()}}
+              | {:error, Ecto.Multi.name(), any(),
+                 %{required(Ecto.Multi.name()) => any()}}
       def transit({changeset, event_changeset}, module) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
@@ -62,7 +68,8 @@ defmodule Eventful.Transition do
     quote do
       def call(
             actor,
-            %unquote(module){@eventful_state => unquote(current_state)} = resource,
+            %unquote(module){@eventful_state => unquote(current_state)} =
+              resource,
             %{domain: unquote(caller), name: unquote(event_name)} = params
           ) do
         with {:ok, :passed} <-

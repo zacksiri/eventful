@@ -23,30 +23,35 @@ defmodule Eventful.TransitionsTest do
   describe "transition successfully" do
     test "can transition", %{model: model, actor: actor} do
       assert {:ok, transaction} =
-        Model.Event.handle(model, actor, %{
-          domain: "transitions", name: "process"
-        })
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "process"
+               })
 
       assert transaction.resource.current_state == "processing"
     end
 
     test "can transition with trigger", %{model: model, actor: actor} do
       Model.Event.handle(model, actor, %{
-        domain: "transitions", name: "process"
+        domain: "transitions",
+        name: "process"
       })
 
       model = Repo.get(Model, model.id)
 
-      assert {:ok, transaction} = Model.Event.handle(model, actor, %{
-        domain: "transitions", name: "approve"
-      })
+      assert {:ok, transaction} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "approve"
+               })
 
       assert transaction.trigger == :something_got_triggered
     end
 
     test "can access events from model", %{model: model, actor: actor} do
       Model.Event.handle(model, actor, %{
-        domain: "transitions", name: "process"
+        domain: "transitions",
+        name: "process"
       })
 
       model =
@@ -59,11 +64,30 @@ defmodule Eventful.TransitionsTest do
   end
 
   describe "transition failure" do
-    test "should not transition if event name is wrong", %{model: model, actor: actor} do
+    test "should not transition if event name is wrong", %{
+      model: model,
+      actor: actor
+    } do
       assert {:error, :invalid_transition_event} =
-        Model.Event.handle(model, actor, %{
-          domain: "transitions", name: "weird"
-        })
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "weird"
+               })
+    end
+  end
+
+  describe "transition with comment" do
+    test "can transition with comment", %{model: model, actor: actor} do
+      comment = "did something"
+
+      assert {:ok, transaction} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "process",
+                 comment: comment
+               })
+
+      assert transaction.event.metadata.comment == comment
     end
   end
 end

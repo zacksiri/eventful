@@ -7,13 +7,9 @@ defmodule Eventful.Test.Repo.Migrations.CreateModelEvents do
       add(:domain, :string, null: false)
       add(:metadata, :map, default: "{}")
 
-      add(:model_id, references(:models, on_delete: :restrict),
-        null: false
-      )
+      add(:model_id, references(:models, on_delete: :restrict), null: false)
 
-      add(:actor_id, references(:actors, on_delete: :restrict),
-        null: false
-      )
+      add(:actor_id, references(:actors, on_delete: :restrict), null: false)
 
       timestamps()
     end
