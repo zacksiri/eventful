@@ -15,7 +15,7 @@ defmodule Eventful.Metadata do
   end
 
   defp starting_map(params) do
-    if Map.has_key?(params, :comment),
+    if Map.has_key?(params, :comment) && not is_nil(params.comment),
       do: %{comment: params.comment},
       else: %{}
   end
