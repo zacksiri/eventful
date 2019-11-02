@@ -89,5 +89,16 @@ defmodule Eventful.TransitionsTest do
 
       assert transaction.event.metadata.comment == comment
     end
+
+    test "can transition with nil comment", %{model: model, actor: actor} do
+      assert {:ok, transaction} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "process",
+                 comment: nil
+               })
+
+      refute Map.has_key?(transaction.event.metadata, :comment)
+    end
   end
 end
