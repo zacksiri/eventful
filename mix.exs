@@ -45,7 +45,6 @@ defmodule Eventful.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:jason, "~> 1.0"},
       {:postgrex, "~> 0.14", only: :test},
-
       {:ex_doc, "~> 0.14", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false}
     ]
