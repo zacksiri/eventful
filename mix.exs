@@ -11,6 +11,7 @@ defmodule Eventful.MixProject do
       aliases: aliases(),
       package: package(),
       deps: deps(),
+      test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
