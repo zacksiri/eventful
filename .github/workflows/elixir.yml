@@ -30,13 +30,11 @@ jobs:
           mix local.hex --force
           mix deps.get
       - name: Run Tests
-        run: mix coveralls
+        run: |
+          mix coveralls.json
+          bash <(curl -s https://codecov.io/bash)
         env:
           POSTGRES_HOST: postgres
           POSTGRES_USERNAME: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
