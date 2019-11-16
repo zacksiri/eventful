@@ -10,7 +10,13 @@ defmodule Eventful.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       package: package(),
-      deps: deps()
+      deps: deps(),
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -45,6 +51,7 @@ defmodule Eventful.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:jason, "~> 1.0"},
       {:postgrex, "~> 0.14", only: :test},
+      {:excoveralls, "~> 0.10", only: :test},
       {:ex_doc, "~> 0.14", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false}
     ]
