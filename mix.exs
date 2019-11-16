@@ -53,6 +53,7 @@ defmodule Eventful.MixProject do
       {:jason, "~> 1.0"},
       {:postgrex, "~> 0.14", only: :test},
       {:excoveralls, "~> 0.10", only: :test},
+      {:credo, "~> 1.1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.14", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false}
     ]
