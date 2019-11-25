@@ -110,6 +110,16 @@ defmodule Eventful.TransitionsTest do
     end
   end
 
+  describe "valid states" do
+    test "list unique valid states", %{model: _model} do
+      assert Enum.sort(Model.Transitions.valid_states()) == [
+               "approved",
+               "created",
+               "processing"
+             ]
+    end
+  end
+
   describe "show possible events" do
     test "show all possible events for a given model", %{model: model} do
       assert Model.Transitions.possible_events(model) == [

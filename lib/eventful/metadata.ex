@@ -1,4 +1,8 @@
 defmodule Eventful.Metadata do
+  @moduledoc """
+  This modules handles processing of the metadata for the event
+  """
+
   @spec build(any, any, map) :: %{:changes => any, optional(:comment) => any}
   def build(resource, changes, params) do
     params

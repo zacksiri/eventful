@@ -1,4 +1,5 @@
 defmodule Eventful.Test.Actor do
+  @moduledoc false
   use Ecto.Schema
   import Ecto.Changeset
 
