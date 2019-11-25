@@ -1,4 +1,6 @@
 defmodule Eventful.Test.Model.Triggers do
+  @moduledoc false
+
   use Eventful.Trigger
 
   alias Eventful.Test.Model

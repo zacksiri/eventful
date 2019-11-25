@@ -6,6 +6,10 @@ defmodule Eventful.Transition do
     repo = Keyword.get(options, :repo)
 
     quote do
+      Module.register_attribute(__MODULE__, :transitions, accumulate: true)
+
+      @before_compile {unquote(__MODULE__), :__before_compile__}
+
       alias Ecto.Multi
 
       import Eventful.Transition
@@ -54,6 +58,25 @@ defmodule Eventful.Transition do
     end
   end
 
+  defmacro __before_compile__(env) do
+    quote do
+      def all, do: @transitions
+
+      def valid_states do
+        @transitions
+        |> Enum.map(fn t -> [t.from, t.to] end)
+        |> List.flatten()
+        |> Enum.uniq()
+      end
+
+      def possible_events(resource) do
+        Enum.filter(@transitions, fn state ->
+          state.from == Map.get(resource, @eventful_state)
+        end)
+      end
+    end
+  end
+
   defmacro transition(module, options, expression) do
     caller =
       __CALLER__.module
@@ -66,6 +89,12 @@ defmodule Eventful.Transition do
     event_name = Keyword.get(options, :via)
 
     quote do
+      @transitions %{
+        from: unquote(current_state),
+        to: unquote(to_state),
+        via: unquote(event_name)
+      }
+
       def call(
             actor,
             %unquote(module){@eventful_state => unquote(current_state)} =

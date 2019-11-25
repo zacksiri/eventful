@@ -1,6 +1,6 @@
 name: Elixir CI
 
-on: push
+on: ['push', 'pull_request']
 
 jobs:
   build:
@@ -30,7 +30,8 @@ jobs:
           mix local.hex --force
           mix deps.get
       - name: Run Tests
-        run: mix test
+        run: |
+          mix coveralls
         env:
           POSTGRES_HOST: postgres
           POSTGRES_USERNAME: postgres
