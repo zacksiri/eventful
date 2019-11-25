@@ -58,7 +58,7 @@ defmodule Eventful.Transition do
     end
   end
 
-  defmacro __before_compile__(env) do
+  defmacro __before_compile__(_env) do
     quote do
       def all, do: @transitions
 
