@@ -1,4 +1,6 @@
 defmodule Eventful.TransitionsTest do
+  @moduledoc false
+
   use Eventful.DataCase
 
   alias Eventful.Test.{
@@ -99,6 +101,20 @@ defmodule Eventful.TransitionsTest do
                })
 
       refute Map.has_key?(transaction.event.metadata, :comment)
+    end
+  end
+
+  describe "transitions" do
+    test "get all transitions", %{model: _model} do
+      assert Enum.count(Model.Transitions.all()) == 2
+    end
+  end
+
+  describe "show possible events" do
+    test "show all possible events for a given model", %{model: model} do
+      assert Model.Transitions.possible_events(model) == [
+               %{from: "created", to: "processing", via: "process"}
+             ]
     end
   end
 end
