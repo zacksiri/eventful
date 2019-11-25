@@ -1,4 +1,6 @@
 defmodule Eventful.Test.Model.Transitions do
+  @moduledoc false
+
   alias Eventful.Test.Model
 
   @behaviour Eventful.Handler

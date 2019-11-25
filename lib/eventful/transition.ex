@@ -62,6 +62,13 @@ defmodule Eventful.Transition do
     quote do
       def all, do: @transitions
 
+      def valid_states do
+        @transitions
+        |> Enum.map(fn t -> [t.from, t.to] end)
+        |> List.flatten()
+        |> Enum.uniq()
+      end
+
       def possible_events(resource) do
         Enum.filter(@transitions, fn state ->
           state.from == Map.get(resource, @eventful_state)

@@ -1,4 +1,8 @@
 defmodule Eventful.Trigger do
+  @moduledoc """
+  Handles the triggering of events
+  """
+
   defmacro __using__(options \\ []) do
     quote do
       import Eventful.Trigger
