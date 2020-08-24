@@ -49,7 +49,7 @@ defmodule Eventful.Transition do
         |> Multi.insert(:event, event_changeset)
         |> Multi.update(:resource, changeset)
         |> Multi.run(:trigger, module, :call, [])
-        |> unquote(repo).transaction()
+        |> unquote(repo).transaction(timeout: unquote(timeout))
       end
 
       defp guard_transition(_resource, _actor, _event_name),
