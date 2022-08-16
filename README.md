@@ -140,6 +140,41 @@ MyApp.Post.Event.handle(post, user, %{domain: "transitions", name: "review"})
 
 This will now transition and track your model and also track who did it.
 
+### Triggers
+
+Triggers allow to run code whenever a transition has been made to a specific state
+
+```elixir
+defmodule MyApp.Post.Triggers do
+  alias MyApp.Post
+
+  use Eventful.Trigger
+
+  Post
+  |> trigger([currently: "reviewing"], fn event, post ->
+    # user code
+  end)
+end
+```
+
+In order for the triggers to execute, you need to pass your custom `Triggers` module to the `transit/2` function
+
+```elixir
+defmodule MyApp.Post.Transitions do
+  alias MyApp.Post
+
+  @behaviour Eventful.Handler
+
+  use Eventful.Transition, repo: MyApp.Repo
+
+  Post
+  |> transition(
+    [from: "draft", to: "reviewing", via: "review"],
+    fn changes -> transit(changes, Post.Triggers) end)
+  )
+end
+```
+
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/eventful](https://hexdocs.pm/eventful).
