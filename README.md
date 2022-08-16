@@ -177,7 +177,7 @@ end
 
 ### Guards
 
-You may add guards allowing to validate an event for a particular resource and an accessor (actor). Guards are added into the transitions module.
+You may add guards allowing to validate an event for a particular resource and an actor (user, system, ... accessing the resource). Guards are added into the transitions module.
 
 The guards should either return `{:ok, :passed}` if the validation passed. Anything else will be considered as an error.
 
@@ -195,13 +195,13 @@ defmodule MyApp.Post.Transitions do
     fn changes -> transit(changes, Post.Triggers) end)
   )
 
-  defp guard_transition(%Post{current_state: _current_state} = post, _accessor_, "review") do
+  defp guard_transition(%Post{current_state: _current_state} = post, _accessor, "review") do
     if MyApp.check_something(post),
       do: {:ok, :passed},
       else: {:error, :failed}
   end
 
-  defp guard_transition(_activity, _accessor_, _), do: {:ok, :passed}
+  defp guard_transition(_activity, _accessor, _), do: {:ok, :passed}
 end
 ```
 
