@@ -175,6 +175,36 @@ defmodule MyApp.Post.Transitions do
 end
 ```
 
+### Guards
+
+You may add guards allowing to validate an event for a particular resource and an accessor (actor). Guards are added into the transitions module.
+
+The guards should either return `{:ok, :passed}` if the validation passed. Anything else will be considered as an error.
+
+```elixir
+defmodule MyApp.Post.Transitions do
+  alias MyApp.Post
+
+  @behaviour Eventful.Handler
+
+  use Eventful.Transition, repo: MyApp.Repo
+
+  Post
+  |> transition(
+    [from: "draft", to: "reviewing", via: "review"],
+    fn changes -> transit(changes, Post.Triggers) end)
+  )
+
+  defp guard_transition(%Post{current_state: _current_state} = post, _accessor_, "review") do
+    if MyApp.check_something(post),
+      do: {:ok, :passed},
+      else: {:error, :failed}
+  end
+
+  defp guard_transition(_activity, _accessor_, _), do: {:ok, :passed}
+end
+```
+
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/eventful](https://hexdocs.pm/eventful).
