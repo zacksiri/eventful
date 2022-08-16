@@ -4,7 +4,7 @@ defmodule Eventful.Transitable do
     transitions_module = Keyword.fetch!(options, :transitions_module)
 
     quote do
-      def state_changeset(%m{} = resource, attrs) do
+      def state_changeset(%_{} = resource, attrs) do
         resource
         |> cast(attrs, [unquote(field)])
         |> validate_required(unquote(field))
