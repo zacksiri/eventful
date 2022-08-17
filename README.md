@@ -35,7 +35,7 @@ end
 
 ### Event Schema
 
-Generally your events table will be used to track events for a specific model you have Let's assume that in this case we have `MyApp.Post` and `MyApp.User` as the authenticated user in our app.
+Generally your events table will be used to track events for a specific model you have. Let's assume that in this case we have `MyApp.Post` and `MyApp.User` as the authenticated user in our app.
 
 We may create something like this.
 
@@ -110,6 +110,19 @@ defmodule MyApp.Post.Transitions do
     [from: "reviewing", to: "published", via: "publish"],
     fn changes -> transit(changes) end)
   )
+end
+```
+
+and specify the transition module for the schema
+
+```elixir
+defmodule MyApp.Post do
+  use Ecto.Schema
+  use Eventful.Transitable, transitions_module: __MODULE__.Transitions
+
+  schema "posts" do
+    field :current_state, :string, default: "draft"
+  end
 end
 ```
 
