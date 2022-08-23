@@ -105,7 +105,7 @@ defmodule Eventful.Transition do
         with {:ok, :passed} <-
                guard_transition(resource, actor, unquote(event_name)) do
           resource
-          |> unquote(module).transition_resource(%{
+          |> unquote(module).state_changeset(%{
             @eventful_state => unquote(to_state)
           })
           |> unquote(module).Event.with_metadata(actor, resource, params)

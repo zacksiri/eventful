@@ -35,7 +35,7 @@ end
 
 ### Event Schema
 
-Generally your events table will be used to track events for a specific model you have Let's assume that in this case we have `MyApp.Post` and `MyApp.User` as the authenticated user in our app.
+Generally your events table will be used to track events for a specific model you have. Let's assume that in this case we have `MyApp.Post` and `MyApp.User` as the authenticated user in our app.
 
 We may create something like this.
 
@@ -113,6 +113,19 @@ defmodule MyApp.Post.Transitions do
 end
 ```
 
+and specify the transition module for the schema
+
+```elixir
+defmodule MyApp.Post do
+  use Ecto.Schema
+  use Eventful.Transitable, transitions_module: __MODULE__.Transitions
+
+  schema "posts" do
+    field :current_state, :string, default: "draft"
+  end
+end
+```
+
 ### Event Handler
 
 You will now need to add the Transitions Handler to your Event module
@@ -139,6 +152,71 @@ MyApp.Post.Event.handle(post, user, %{domain: "transitions", name: "review"})
 ```
 
 This will now transition and track your model and also track who did it.
+
+### Triggers
+
+Triggers allow to run code whenever a transition has been made to a specific state
+
+```elixir
+defmodule MyApp.Post.Triggers do
+  alias MyApp.Post
+
+  use Eventful.Trigger
+
+  Post
+  |> trigger([currently: "reviewing"], fn event, post ->
+    # user code
+  end)
+end
+```
+
+In order for the triggers to execute, you need to pass your custom `Triggers` module to the `transit/2` function
+
+```elixir
+defmodule MyApp.Post.Transitions do
+  alias MyApp.Post
+
+  @behaviour Eventful.Handler
+
+  use Eventful.Transition, repo: MyApp.Repo
+
+  Post
+  |> transition(
+    [from: "draft", to: "reviewing", via: "review"],
+    fn changes -> transit(changes, Post.Triggers) end)
+  )
+end
+```
+
+### Guards
+
+You may add guards allowing to validate an event for a particular resource and an actor (user or system originating the event). Guards are added into the transitions module.
+
+The guards should either return `{:ok, :passed}` if the validation passed. Anything else will be considered as an error.
+
+```elixir
+defmodule MyApp.Post.Transitions do
+  alias MyApp.Post
+
+  @behaviour Eventful.Handler
+
+  use Eventful.Transition, repo: MyApp.Repo
+
+  Post
+  |> transition(
+    [from: "draft", to: "reviewing", via: "review"],
+    fn changes -> transit(changes, Post.Triggers) end)
+  )
+
+  defp guard_transition(%Post{current_state: _current_state} = post, _originator, "review") do
+    if MyApp.check_something(post),
+      do: {:ok, :passed},
+      else: {:error, :failed}
+  end
+
+  defp guard_transition(_activity, _originator, _), do: {:ok, :passed}
+end
+```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
