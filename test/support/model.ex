@@ -1,10 +1,11 @@
 defmodule Eventful.Test.Model do
   @moduledoc false
 
-  use Ecto.Schema
-  import Ecto.Changeset
-
   use Eventful.Transitable, transitions_module: __MODULE__.Transitions
+
+  use Ecto.Schema
+
+  import Ecto.Changeset
 
   schema "models" do
     field(:current_state, :string, default: "created")

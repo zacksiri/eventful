@@ -4,6 +4,8 @@ defmodule Eventful.Transitable do
     transitions_module = Keyword.fetch!(options, :transitions_module)
 
     quote do
+      import Ecto.Changeset
+
       def state_changeset(%_{} = resource, attrs) do
         resource
         |> cast(attrs, [unquote(field)])
