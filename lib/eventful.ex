@@ -8,6 +8,7 @@ defmodule Eventful do
     binary_id = Keyword.get(options, :binary_id)
     {parent_relation, parent_module} = Keyword.get(options, :parent)
     {actor_relation, actor_module} = Keyword.get(options, :actor)
+    event_relation = Keyword.get(options, :event_relation) || "#{parent_relation}_events"
 
     quote do
       use Ecto.Schema
@@ -19,7 +20,7 @@ defmodule Eventful do
         @foreign_key_type :binary_id
       end
 
-      schema "#{unquote(parent_relation)}_events" do
+      schema "#{unquote(event_relation)}" do
         belongs_to(unquote(parent_relation), unquote(parent_module))
         belongs_to(unquote(actor_relation), unquote(actor_module))
 
