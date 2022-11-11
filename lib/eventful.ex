@@ -8,7 +8,9 @@ defmodule Eventful do
     binary_id = Keyword.get(options, :binary_id)
     {parent_relation, parent_module} = Keyword.get(options, :parent)
     {actor_relation, actor_module} = Keyword.get(options, :actor)
-    table_name = Keyword.get(options, :table_name) || "#{parent_relation}_events"
+
+    table_name =
+      Keyword.get(options, :table_name) || "#{parent_relation}_events"
 
     quote do
       use Ecto.Schema
