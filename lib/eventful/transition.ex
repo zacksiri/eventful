@@ -4,6 +4,7 @@ defmodule Eventful.Transition do
   """
   defmacro __using__(options \\ []) do
     repo = Keyword.get(options, :repo)
+    timeout = Keyword.get(options, :timeout, 15_000)
 
     quote do
       Module.register_attribute(__MODULE__, :transitions, accumulate: true)
@@ -35,7 +36,7 @@ defmodule Eventful.Transition do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
         |> Multi.update(:resource, changeset)
-        |> unquote(repo).transaction()
+        |> unquote(repo).transaction(timeout: unquote(timeout))
       end
 
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}, atom) ::
@@ -48,7 +49,7 @@ defmodule Eventful.Transition do
         |> Multi.insert(:event, event_changeset)
         |> Multi.update(:resource, changeset)
         |> Multi.run(:trigger, module, :call, [])
-        |> unquote(repo).transaction()
+        |> unquote(repo).transaction(timeout: unquote(timeout))
       end
 
       defp guard_transition(_resource, _actor, _event_name),
@@ -104,7 +105,9 @@ defmodule Eventful.Transition do
         with {:ok, :passed} <-
                guard_transition(resource, actor, unquote(event_name)) do
           resource
-          |> unquote(module).changeset(%{@eventful_state => unquote(to_state)})
+          |> unquote(module).state_changeset(%{
+            @eventful_state => unquote(to_state)
+          })
           |> unquote(module).Event.with_metadata(actor, resource, params)
           |> unquote(expression).()
         else

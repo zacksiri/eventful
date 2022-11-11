@@ -1,14 +1,11 @@
 defmodule Eventful.Test.Model do
   @moduledoc false
 
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Eventful.Transitable, transitions_module: __MODULE__.Transitions
 
-  @valid_states ~w(
-    created
-    processing
-    approved
-  )
+  use Ecto.Schema
+
+  import Ecto.Changeset
 
   schema "models" do
     field(:current_state, :string, default: "created")
@@ -19,8 +16,6 @@ defmodule Eventful.Test.Model do
   @doc false
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, [:current_state])
-    |> validate_required([:current_state])
-    |> validate_inclusion(:current_state, @valid_states)
+    |> cast(attrs, [])
   end
 end
