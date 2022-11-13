@@ -1,20 +1,40 @@
 defmodule Eventful.Transitable do
-  defmacro __using__(options) do
-    field = Keyword.get(options, :eventful_state, :current_state)
-    transitions_module = Keyword.fetch!(options, :transitions_module)
-
+  defmacro __using__(_options) do
     quote do
-      import Ecto.Changeset
+      Module.register_attribute(__MODULE__, :governors, accumulate: true)
+
+      @before_compile {unquote(__MODULE__), :__before_compile__}
+
+      import Eventful.Transitable
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote do
+      def governors(), do: @governors
 
       def state_changeset(%_{} = resource, attrs) do
-        resource
-        |> cast(attrs, [unquote(field)])
-        |> validate_required(unquote(field))
-        |> validate_inclusion(
-          unquote(field),
-          unquote(transitions_module).valid_states()
-        )
+        fields = Enum.map(@governors, fn g -> g.governs end)
+
+        changeset = cast(resource, attrs, fields)
+
+        @governors
+        |> Enum.reduce(changeset, fn g, acc ->
+          validate_inclusion(acc, g.governs, g.module.valid_states())
+        end)
       end
+    end
+  end
+
+  defmacro governs(module, field, options) do
+    on = Keyword.fetch!(options, :on)
+
+    quote do
+      @governors %{
+        module: unquote(module),
+        governs: unquote(field),
+        via: unquote(on)
+      }
     end
   end
 end

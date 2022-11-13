@@ -32,6 +32,16 @@ defmodule Eventful.TransitionsTest do
 
       assert transaction.resource.current_state == "processing"
     end
+    
+    test "can transition internal", %{model: model, actor: actor} do
+      assert {:ok, transaction} =
+               Model.InternalEvent.handle(model, actor, %{
+                 domain: "internal_transitions",
+                 name: "activate"
+               })
+    
+      assert transaction.resource.internal_state == "active"
+    end
 
     test "can transition with trigger", %{model: model, actor: actor} do
       Model.Event.handle(model, actor, %{
