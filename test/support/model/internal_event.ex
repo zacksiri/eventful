@@ -1,12 +1,13 @@
 defmodule Eventful.Test.Model.InternalEvent do
   alias Eventful.Test.{
     Model,
-    Actor
+    User
   }
 
   use Eventful,
     parent: {:model, Model},
-    actor: {:actor, Actor}
+    actor: {:user, User},
+    table_name: "model_internal_events"
 
   handle(:internal_transitions, using: Model.InternalTransitions)
 end

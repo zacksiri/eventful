@@ -5,5 +5,9 @@ defmodule Eventful.Test.Repo.Migrations.CreateActors do
     create table(:actors) do
       add(:name, :string, null: false)
     end
+
+    create table(:users) do
+      add(:name, :string, null: false)
+    end
   end
 end

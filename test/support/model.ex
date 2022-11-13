@@ -9,13 +9,13 @@ defmodule Eventful.Test.Model do
 
   alias __MODULE__.Transitions
   alias __MODULE__.Event
-  
+
   alias __MODULE__.InternalTransitions
   alias __MODULE__.InternalEvent
 
   Transitions
   |> governs(:current_state, on: Event)
-  
+
   InternalTransitions
   |> governs(:internal_state, on: InternalEvent)
 

@@ -5,7 +5,8 @@ defmodule Eventful.TransitionsTest do
 
   alias Eventful.Test.{
     Model,
-    Actor
+    Actor,
+    User
   }
 
   setup do
@@ -19,7 +20,12 @@ defmodule Eventful.TransitionsTest do
       |> Actor.changeset(%{name: "zack"})
       |> Repo.insert()
 
-    {:ok, %{model: model, actor: actor}}
+    {:ok, user} =
+      %User{}
+      |> User.changeset(%{name: "zack"})
+      |> Repo.insert()
+
+    {:ok, model: model, actor: actor, user: user}
   end
 
   describe "transition successfully" do
@@ -32,14 +38,14 @@ defmodule Eventful.TransitionsTest do
 
       assert transaction.resource.current_state == "processing"
     end
-    
-    test "can transition internal", %{model: model, actor: actor} do
+
+    test "can transition internal", %{model: model, user: user} do
       assert {:ok, transaction} =
-               Model.InternalEvent.handle(model, actor, %{
+               Model.InternalEvent.handle(model, user, %{
                  domain: "internal_transitions",
                  name: "activate"
                })
-    
+
       assert transaction.resource.internal_state == "active"
     end
 
