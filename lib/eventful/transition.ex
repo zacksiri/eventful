@@ -79,8 +79,10 @@ defmodule Eventful.Transition do
   end
 
   defmacro transition(module, options, expression) do
+    caller_module = __CALLER__.module
+
     caller =
-      __CALLER__.module
+      caller_module
       |> Macro.underscore()
       |> String.split("/")
       |> List.last()
@@ -104,11 +106,16 @@ defmodule Eventful.Transition do
           ) do
         with {:ok, :passed} <-
                guard_transition(resource, actor, unquote(event_name)) do
+          governor =
+            Enum.find(unquote(module).governors(), fn governor ->
+              governor.module == unquote(caller_module)
+            end)
+
           resource
           |> unquote(module).state_changeset(%{
             @eventful_state => unquote(to_state)
           })
-          |> unquote(module).Event.with_metadata(actor, resource, params)
+          |> governor.via.with_metadata(actor, resource, params)
           |> unquote(expression).()
         else
           _ -> {:error, :guard_failed, resource}
