@@ -32,7 +32,7 @@ defmodule Eventful.MixProject do
   defp package do
     [
       description: "Provide Event tracking for your Ecto Model",
-      files: ["lib", "mix.exs", "README*"],
+      files: ["lib", "mix.exs", "README.md"],
       maintainers: ["Zack Siri"],
       licenses: ["MIT"],
       links: %{github: "https://github.com/zacksiri/eventful"}
