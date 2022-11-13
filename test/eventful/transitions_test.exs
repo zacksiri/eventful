@@ -39,6 +39,16 @@ defmodule Eventful.TransitionsTest do
       assert transaction.resource.current_state == "processing"
     end
 
+    test "can transition using publishings", %{model: model, actor: actor} do
+      assert {:ok, transaction} =
+               Model.Event.handle(model, actor, %{
+                 domain: "publishings",
+                 name: "publish"
+               })
+
+      assert transaction.resource.publish_state == "published"
+    end
+
     test "can transition internal", %{model: model, user: user} do
       assert {:ok, transaction} =
                Model.InternalEvent.handle(model, user, %{
