@@ -1,6 +1,33 @@
 defmodule Eventful do
   @moduledoc """
   Sets up Event Tracking Schema
+  
+  You can define a basic Event schema like so
+  
+  defmodule Post.Event do
+    alias MyApp.{
+      Post,
+      User
+    }
+    
+    use Eventful,
+      parent: {:post, Post},
+      actor: {:user, User}
+  end
+  
+  By default it will use the table name `post_events` however if you wish to customize the table name you can pass the option :table_name
+  
+  defmodule Post.Event do
+    alias MyApp.{
+      Post,
+      User
+    }
+    
+    use Eventful,
+      parent: {:post, Post},
+      actor: {:user, User},
+      table_name: "post_user_events"
+  end
   """
 
   defmacro __using__(options) do
