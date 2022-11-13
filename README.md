@@ -12,7 +12,7 @@ by adding `eventful` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:eventful, "~> 0.2.0"}
+    {:eventful, "~> 2.0.0"}
   ]
 end
 ```
@@ -119,6 +119,12 @@ and specify the transition module for the schema
 defmodule MyApp.Post do
   use Ecto.Schema
   use Eventful.Transitable, transitions_module: __MODULE__.Transitions
+  
+  alias Post.Transitions
+  alias Post.Event
+  
+  Transitions
+  |> governs(:current_state, on: Event)
 
   schema "posts" do
     field :current_state, :string, default: "draft"
