@@ -118,7 +118,7 @@ and specify the transition module for the schema
 ```elixir
 defmodule MyApp.Post do
   use Ecto.Schema
-  use Eventful.Transitable, transitions_module: __MODULE__.Transitions
+  use Eventful.Transitable
   
   alias Post.Transitions
   alias Post.Event
