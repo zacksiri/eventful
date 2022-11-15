@@ -180,3 +180,9 @@ That's it! That's how your set up your first auditable state machine on your sch
 {:ok, transition} =
   MyApp.Post.UserEvent.handle(post, user, %{domain: "transitions", event_name: "publish"})
 ```
+
+## Copyright and License
+
+Copyright (c) 2022, Zack Siri.
+
+Eventful source code is licensed under the [MIT License](LICENSE.md).
