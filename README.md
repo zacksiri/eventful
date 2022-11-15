@@ -1,6 +1,6 @@
 # Eventful
 
-![](https://github.com/zacksiri/eventful/workflows/Elixir%20CI/badge.svg)
+![](https://github.com/zacksiri/eventful/workflows/Elixir%20CI/badge.svg)[![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/eventful)
 
 Eventful is a library for anyone who needs a trackable state machine. With transitions and triggers and guards.
 
