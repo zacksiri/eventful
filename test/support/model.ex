@@ -8,6 +8,7 @@ defmodule Eventful.Test.Model do
   import Ecto.Changeset
 
   alias __MODULE__.Transitions
+  alias __MODULE__.Publishings
   alias __MODULE__.Event
 
   alias __MODULE__.InternalTransitions
@@ -16,10 +17,14 @@ defmodule Eventful.Test.Model do
   Transitions
   |> governs(:current_state, on: Event)
 
+  Publishings
+  |> governs(:publish_state, on: Event)
+
   InternalTransitions
   |> governs(:internal_state, on: InternalEvent)
 
   schema "models" do
+    field(:publish_state, :string, default: "draft")
     field(:current_state, :string, default: "created")
     field(:internal_state, :string, default: "created")
 

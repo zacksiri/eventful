@@ -2,10 +2,12 @@ defmodule Eventful.MixProject do
   @moduledoc false
   use Mix.Project
 
+  @version "2.0.1"
+
   def project do
     [
       app: :eventful,
-      version: "2.0.0",
+      version: @version,
       elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -13,6 +15,7 @@ defmodule Eventful.MixProject do
       package: package(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
+      docs: docs(),
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
@@ -32,7 +35,7 @@ defmodule Eventful.MixProject do
   defp package do
     [
       description: "Provide Event tracking for your Ecto Model",
-      files: ["lib", "mix.exs", "README*"],
+      files: ["lib", "mix.exs", "README.md"],
       maintainers: ["Zack Siri"],
       licenses: ["MIT"],
       links: %{github: "https://github.com/zacksiri/eventful"}
@@ -46,6 +49,30 @@ defmodule Eventful.MixProject do
     [test: ["ecto.create --quiet", "ecto.migrate", "test"]]
   end
 
+  defp docs do
+    [
+      source_ref: "#{@version}",
+      main: "getting-started",
+      extra_section: "GUIDES",
+      extras: extras(),
+      groups_for_extras: groups_for_extras()
+    ]
+  end
+
+  defp extras do
+    [
+      "guides/introduction/getting-started.md",
+      "guides/introduction/triggers.md",
+      "guides/introduction/guards.md"
+    ]
+  end
+
+  defp groups_for_extras do
+    [
+      Introduction: ~r/guides\/introduction\/.?/
+    ]
+  end
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
@@ -55,7 +82,7 @@ defmodule Eventful.MixProject do
       {:postgrex, "~> 0.14", only: :test},
       {:excoveralls, "~> 0.10", only: :test},
       {:credo, "~> 1.1.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.14", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false}
     ]
   end

@@ -9,4 +9,5 @@ defmodule Eventful.Test.Model.Event do
     actor: {:actor, Actor}
 
   handle(:transitions, using: Model.Transitions)
+  handle(:publishings, using: Model.Publishings)
 end

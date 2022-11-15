@@ -1,6 +1,46 @@
 defmodule Eventful.Transition do
   @moduledoc """
-  Providers Macro for Tracking Event with Update
+  This module providers the macros for building the transition modules
+
+  Here is an example:
+
+      defmodule MyApp.Post.Transitions do
+        use Eventful.Transition, repo: MyApp.Repo
+        
+        @behaviour Eventful.Handler
+        
+        alias MyApp.Post
+        
+        Post
+        |> transition([from: "created", to: "published", via: "publish", fn changes ->
+          transit(changes)
+        end)
+        
+        Post
+        |> transition([from: "created", to: "deleted", via: "delete", fn changes ->
+          transit(changes)
+        end)
+      end
+      
+  You can also define multiple state machines for example for a given `post` you can also have a machine for your `:visibility` field
+
+      defmodule MyApp.Post.Visibilities do
+        use Eventful.Transition, repo: MyApp.Repo, eventful_state: :visibility
+        
+        @behaviour Eventful.Handler
+        
+        alias MyApp.Post
+        
+        Post
+        |> transition([from: "private", to: "public", via: "publicize", fn changes ->
+          transit(changes)
+        end)
+        
+        Post
+        |> transition([from: "public", to: "private", via: "privatize", fn changes ->
+          transit(changes)
+        end)
+      end
   """
   defmacro __using__(options \\ []) do
     repo = Keyword.get(options, :repo)
@@ -78,6 +118,14 @@ defmodule Eventful.Transition do
     end
   end
 
+  @doc """
+  The transition macro allows you to define the state machine for your transitions
+
+      Post
+      |> transition([from: "created", to: "published", via: "publish", fn changes ->
+        transit(changes)
+      end)
+  """
   defmacro transition(module, options, expression) do
     caller_module = __CALLER__.module
 

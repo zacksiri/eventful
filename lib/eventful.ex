@@ -1,6 +1,64 @@
 defmodule Eventful do
   @moduledoc """
-  Sets up Event Tracking Schema
+  This is the main Eventful module.
+
+  Eventful makes it easy to define your state machines on a given field on your schema.
+
+  You can even have multiple state machines on a single schema.
+
+  Let's define the `Event` module.
+
+      defmodule MyApp.Post.Event do
+        alias MyApp.{
+          Post,
+          User
+        }
+        
+        use Eventful,
+          parent: {:post, Post},
+          actor: {:user, User}
+          
+        handle(:transitions, using: Post.Transitions)
+      end
+      
+  You will need to define a `Transitions` module for `MyApp.Post` 
+
+      defmodule MyApp.Post.Transitions do
+        use Eventful.Transition, repo: MyApp.Repo
+        
+        @behaviour Eventful.Handler
+        
+        alias MyApp.Post
+        
+        Post
+        |> transition([from: "created", to: "published", via: "publish", fn changes ->
+          transit(changes)
+        end)
+        
+        Post
+        |> transition([from: "created", to: "deleted", via: "delete", fn changes ->
+          transit(changes)
+        end)
+      end
+
+  In this example we're defining `Transitions` on `:current_state`. Events will be stored using the `Event` schema.
+
+      defmodule MyApp.Post do
+        use Ecto.Schema
+        import Ecto.Changeset
+      
+        use Eventful.Transitable
+      
+        alias __MODULE__.Event
+        alias __MODULE__.Transitions
+      
+        Transitions
+        |> governs(:current_state, on: Event)
+      
+        schema "posts" do
+          field :current_state, :string, default: "created"
+        end
+      end
   """
 
   defmacro __using__(options) do
@@ -68,6 +126,23 @@ defmodule Eventful do
     end
   end
 
+  @doc """
+  You can use the handle function to define the handler for a given domain:
+
+      defmodule MyApp.Post.Event do
+        alias MyApp.{
+          Post,
+          User
+        }
+        
+        use Eventful,
+          parent: {:post, Post},
+          actor: {:user, User}
+          
+        handle(:transitions, using: Post.Transitions)
+        handle(:visibilities, using: Post.Visibilities)
+      end
+  """
   defmacro handle(domain, options) do
     using = Keyword.get(options, :using)
     string_domain = Atom.to_string(domain)

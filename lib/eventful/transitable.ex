@@ -1,4 +1,62 @@
 defmodule Eventful.Transitable do
+  @moduledoc """
+  This module is the one you'll use to define your main schema which require the state machine.
+
+  For example imagine the following:
+
+      defmodule MyApp.Post do
+        use Ecto.Schema
+        import Ecto.Changeset
+
+        schema "posts" do
+          field :current_state, :string, default: "created"
+        end
+      end
+
+  You can add a state machine like this assuming you've setup the `Event` module already:
+
+      defmodule MyApp.Post do
+        use Ecto.Schema
+        import Ecto.Changeset
+
+        use Eventful.Transitable
+
+        alias __MODULE__.Event
+        alias __MODULE__.Transitions
+
+        Transitions
+        |> governs(:current_state, on: Event)
+
+        schema "posts" do
+          field :current_state, :string, default: "created"
+        end
+      end
+
+  You can also setup multiple state machines with multiple fields:
+
+      defmodule MyApp.Post do
+        use Ecto.Schema
+        import Ecto.Changeset
+
+        use Eventful.Transitable
+
+        alias __MODULE__.Event
+        alias __MODULE__.Transitions
+        alias __MODULE__.Visibilities
+
+        Transitions
+        |> governs(:current_state, on: Event)
+
+        Visibilities
+        |> governs(:visibility, on: Event)
+
+        schema "posts" do
+          field :current_state, :string, default: "created"
+          field :visibility, :string, default: "private"
+        end
+      end
+  """
+
   defmacro __using__(_options) do
     quote do
       Module.register_attribute(__MODULE__, :governors, accumulate: true)
@@ -26,6 +84,12 @@ defmodule Eventful.Transitable do
     end
   end
 
+  @doc """
+  The governs function allows you to define governance on each of your fields.
+    
+      Transitions
+      |> governs(:current_state, on: Event)
+  """
   defmacro governs(module, field, options) do
     on = Keyword.fetch!(options, :on)
 

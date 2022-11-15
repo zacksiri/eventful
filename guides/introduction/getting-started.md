@@ -1,21 +1,4 @@
-# Eventful
-
-![](https://github.com/zacksiri/eventful/workflows/Elixir%20CI/badge.svg)
-
-Eventful is a library for anyone who needs a trackable state machine. With transitions and triggers and guards.
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `eventful` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:eventful, "~> 2.0.0"}
-  ]
-end
-```
+# Getting Started
 
 Eventful is a state machine library with an audit trail for your schemas. You can attach a state machine to any schema in your application.
 
@@ -173,15 +156,9 @@ defmodule MyApp.Repo.Migrations.AddCurrentStateToPosts do
 end
 ```
 
-## Transitioning the State
-
 That's it! That's how your set up your first auditable state machine on your schema. You can how transition the post from state to state.
 
 ```
 {:ok, transition} =
   MyApp.Post.UserEvent.handle(post, user, %{domain: "transitions", event_name: "publish"})
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/eventful](https://hexdocs.pm/eventful).
