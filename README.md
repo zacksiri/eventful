@@ -6,8 +6,7 @@ Eventful is a library for anyone who needs a trackable state machine. With trans
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `eventful` to your list of dependencies in `mix.exs`:
+You can add `eventful` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
