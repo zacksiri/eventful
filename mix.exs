@@ -61,7 +61,9 @@ defmodule Eventful.MixProject do
 
   defp extras do
     [
-      "guides/introduction/getting-started.md"
+      "guides/introduction/getting-started.md",
+      "guides/introduction/triggers.md",
+      "guides/introduction/guards.md"
     ]
   end
 

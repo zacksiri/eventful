@@ -17,30 +17,33 @@ def deps do
 end
 ```
 
-### Current State
+Eventful is a state machine library with an audit trail for your schemas. You can attach a state machine to any schema in your application.
 
-You will need to create a `:current_state` field in your model
+In the following we will use a blogging app as an example. Let's imagine you had a schema like the following to store your blog post.
 
-```elixir
-schema "posts" do
-  field :current_state, :string, default: "draft"
-end
+```
+defmodule MyApp.Post do
+  use Ecto.Schema
+  import Ecto.Changeset
 
-# migration
+  schema "posts" do
+    field :title, :string
+    field :content, :string
+  end
 
-alter table(:posts) do
-  field :current_state, :string, default: "draft", null: false
+  def changeset(resource, attrs) do
+    resource
+    |> cast(attrs, [:title, :content])
+  end
 end
 ```
 
-### Event Schema
+## Event Schema
 
-Generally your events table will be used to track events for a specific model you have. Let's assume that in this case we have `MyApp.Post` and `MyApp.User` as the authenticated user in our app.
+Let's imagine you want the ability to track the `state` of this post. You may have a collaboration feature where posts can be put into `draft` or `published` state, moreover you also want to track who did the transition. Let's assume you have a `User` schema of some kind. You could define an `Event` module like the following:
 
-We may create something like this.
-
-```elixir
-defmodule MyApp.Post.Event do
+```
+defmodule MyApp.Post.UserEvent do
   alias MyApp.{
     Post,
     User
@@ -48,20 +51,21 @@ defmodule MyApp.Post.Event do
 
   use Eventful,
     parent: {:post, Post},
-    actor: {:user, User}
+    actor: {:user, User},
+    table_name: "post_user_events"
 end
 ```
 
-### Migration
+## Migration
 
-Generate a migration file for your events like this.
+To make this work you'll also need to add a migration.
 
-```elixir
-defmodule MyApp.Repo.Migrations.CreatePostEvents do
+```
+defmodule MyApp.Repo.Migrations.CreatePostUserEvents do
   use Ecto.Migration
 
   def change do
-    create table(:post_events) do
+    create table(:post_user_events) do
       add(:name, :string, null: false)
       add(:domain, :string, null: false)
       add(:metadata, :map, default: "{}")
@@ -87,57 +91,58 @@ defmodule MyApp.Repo.Migrations.CreatePostEvents do
 end
 ```
 
-### Transitions
+## State Machine
+Next you'll need to define your `Transitions` this will allow you to define which states the post can transition to.
 
-The next thing is defining a `Transitions` module
-
-```elixir
+```
 defmodule MyApp.Post.Transitions do
-  alias MyApp.Post
-
-  @behaviour Eventful.Handler
-
   use Eventful.Transition, repo: MyApp.Repo
-
+  
+  @behaviour Eventful.Handler
+  
+  alias MyApp.Post
+  
   Post
-  |> transition(
-    [from: "draft", to: "reviewing", via: "review"],
-    fn changes -> transit(changes) end)
-  )
-
+  |> transition([from: "draft", to: "published", via: "publish", fn changes ->
+    transit(changes)
+  end)
+  
   Post
-  |> transition(
-    [from: "reviewing", to: "published", via: "publish"],
-    fn changes -> transit(changes) end)
-  )
+  |> transition([from: "published", to: "draft", via: "drafting", fn changes ->
+    transit(changes)
+  end)
 end
 ```
 
-and specify the transition module for the schema
+Next you'll need to add some field to your `Post` schema which will be used to track the transitions. In this case let's add `:current_state` as the field and also define how the field is governed.
 
-```elixir
+```
 defmodule MyApp.Post do
-  use Ecto.Schema
+  # ...
+  
   use Eventful.Transitable
   
-  alias Post.Transitions
-  alias Post.Event
+  alias __MODULE__.UserEvent
+  alias __MODULE__.Transitions
   
   Transitions
-  |> governs(:current_state, on: Event)
+  |> governs(:current_state, on: UserEvent)
 
   schema "posts" do
+    field :title, :string
+    field :content, :string
+    
     field :current_state, :string, default: "draft"
   end
+
+  # ...
 end
 ```
 
-### Event Handler
+Also be sure to define the handler in your `UserEvent` module
 
-You will now need to add the Transitions Handler to your Event module
-
-```elixir
-defmodule MyApp.Post.Event do
+```
+defmodule MyApp.Post.UserEvent do
   alias MyApp.{
     Post,
     User
@@ -145,83 +150,36 @@ defmodule MyApp.Post.Event do
 
   use Eventful,
     parent: {:post, Post},
-    actor: {:user, User}
-
+    actor: {:user, User},
+    table_name: "post_user_events"
+    
   handle(:transitions, using: Post.Transitions)
 end
 ```
 
-### Transitioning from State to State
+You'll also need to add a migration for the post. You can use `:string` or if you prefer `:citext` for your `:current_state` field.
 
-```elixir
-MyApp.Post.Event.handle(post, user, %{domain: "transitions", name: "review"})
 ```
+defmodule MyApp.Repo.Migrations.AddCurrentStateToPosts do
+  use Ecto.Migration
 
-This will now transition and track your model and also track who did it.
-
-### Triggers
-
-Triggers allow to run code whenever a transition has been made to a specific state
-
-```elixir
-defmodule MyApp.Post.Triggers do
-  alias MyApp.Post
-
-  use Eventful.Trigger
-
-  Post
-  |> trigger([currently: "reviewing"], fn event, post ->
-    # user code
-  end)
-end
-```
-
-In order for the triggers to execute, you need to pass your custom `Triggers` module to the `transit/2` function
-
-```elixir
-defmodule MyApp.Post.Transitions do
-  alias MyApp.Post
-
-  @behaviour Eventful.Handler
-
-  use Eventful.Transition, repo: MyApp.Repo
-
-  Post
-  |> transition(
-    [from: "draft", to: "reviewing", via: "review"],
-    fn changes -> transit(changes, Post.Triggers) end)
-  )
-end
-```
-
-### Guards
-
-You may add guards allowing to validate an event for a particular resource and an actor (user or system originating the event). Guards are added into the transitions module.
-
-The guards should either return `{:ok, :passed}` if the validation passed. Anything else will be considered as an error.
-
-```elixir
-defmodule MyApp.Post.Transitions do
-  alias MyApp.Post
-
-  @behaviour Eventful.Handler
-
-  use Eventful.Transition, repo: MyApp.Repo
-
-  Post
-  |> transition(
-    [from: "draft", to: "reviewing", via: "review"],
-    fn changes -> transit(changes, Post.Triggers) end)
-  )
-
-  defp guard_transition(%Post{current_state: _current_state} = post, _originator, "review") do
-    if MyApp.check_something(post),
-      do: {:ok, :passed},
-      else: {:error, :failed}
+  def change do
+    alter table(:posts) do
+      add(:current_state, :citext, default: "draft", null: false)
+    end
+    
+    create(index(:posts, [:current_state]))
   end
-
-  defp guard_transition(_activity, _originator, _), do: {:ok, :passed}
 end
+```
+
+## Transitioning the State
+
+That's it! That's how your set up your first auditable state machine on your schema. You can how transition the post from state to state.
+
+```
+{:ok, transition} =
+  MyApp.Post.UserEvent.handle(post, user, %{domain: "transitions", event_name: "publish"})
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
