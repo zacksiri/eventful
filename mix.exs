@@ -2,10 +2,12 @@ defmodule Eventful.MixProject do
   @moduledoc false
   use Mix.Project
 
+  @version "2.0.0"
+
   def project do
     [
       app: :eventful,
-      version: "2.0.0",
+      version: @version,
       elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -13,6 +15,7 @@ defmodule Eventful.MixProject do
       package: package(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
+      docs: docs(),
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
@@ -44,6 +47,28 @@ defmodule Eventful.MixProject do
 
   defp aliases do
     [test: ["ecto.create --quiet", "ecto.migrate", "test"]]
+  end
+
+  defp docs do
+    [
+      source_ref: "#{@version}",
+      main: "getting-started",
+      extra_section: "GUIDES",
+      extras: extras(),
+      groups_for_extras: groups_for_extras()
+    ]
+  end
+
+  defp extras do
+    [
+      "guides/introduction/getting-started.md"
+    ]
+  end
+
+  defp groups_for_extras do
+    [
+      Introduction: ~r/guides\/introduction\/.?/
+    ]
   end
 
   # Run "mix help deps" to learn about dependencies.

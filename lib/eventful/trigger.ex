@@ -1,9 +1,9 @@
 defmodule Eventful.Trigger do
   @moduledoc """
   Handles the triggering of events
-  
+
   You can define a trigger in the following way
-  
+
       defmodule MyApp.Post.Triggers do
         use Eventful.Trigger
         
@@ -27,10 +27,10 @@ defmodule Eventful.Trigger do
                       )
     end
   end
-  
+
   @doc """
   The trigger macro function allows you to define a trigger in your trigger module
-  
+
       Post
       |> trigger([currently: "published"], fn event, post -> 
         # add your code here.

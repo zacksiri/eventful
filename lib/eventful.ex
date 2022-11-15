@@ -1,7 +1,7 @@
 defmodule Eventful do
   @moduledoc """
   This is the main Eventful module.
-  
+
   ## Getting started
 
   Eventful makes it easy to define your state machines on a given field on your schema.
