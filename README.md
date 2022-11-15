@@ -21,7 +21,7 @@ Eventful is a state machine library with an audit trail for your schemas. You ca
 
 In the following we will use a blogging app as an example. Let's imagine you had a schema like the following to store your blog post.
 
-```
+```elixir
 defmodule MyApp.Post do
   use Ecto.Schema
   import Ecto.Changeset
@@ -42,7 +42,7 @@ end
 
 Let's imagine you want the ability to track the `state` of this post. You may have a collaboration feature where posts can be put into `draft` or `published` state, moreover you also want to track who did the transition. Let's assume you have a `User` schema of some kind. You could define an `Event` module like the following:
 
-```
+```elixir
 defmodule MyApp.Post.UserEvent do
   alias MyApp.{
     Post,
@@ -60,7 +60,7 @@ end
 
 To make this work you'll also need to add a migration.
 
-```
+```elixir
 defmodule MyApp.Repo.Migrations.CreatePostUserEvents do
   use Ecto.Migration
 
@@ -94,7 +94,7 @@ end
 ## State Machine
 Next you'll need to define your `Transitions` this will allow you to define which states the post can transition to.
 
-```
+```elixir
 defmodule MyApp.Post.Transitions do
   use Eventful.Transition, repo: MyApp.Repo
   
@@ -116,7 +116,7 @@ end
 
 Next you'll need to add some field to your `Post` schema which will be used to track the transitions. In this case let's add `:current_state` as the field and also define how the field is governed.
 
-```
+```elixir
 defmodule MyApp.Post do
   # ...
   
@@ -141,7 +141,7 @@ end
 
 Also be sure to define the handler in your `UserEvent` module
 
-```
+```elixir
 defmodule MyApp.Post.UserEvent do
   alias MyApp.{
     Post,
@@ -159,7 +159,7 @@ end
 
 You'll also need to add a migration for the post. You can use `:string` or if you prefer `:citext` for your `:current_state` field.
 
-```
+```elixir
 defmodule MyApp.Repo.Migrations.AddCurrentStateToPosts do
   use Ecto.Migration
 
@@ -177,11 +177,7 @@ end
 
 That's it! That's how your set up your first auditable state machine on your schema. You can how transition the post from state to state.
 
-```
+```elixir
 {:ok, transition} =
   MyApp.Post.UserEvent.handle(post, user, %{domain: "transitions", event_name: "publish"})
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/eventful](https://hexdocs.pm/eventful).
