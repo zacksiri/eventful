@@ -15,7 +15,7 @@ defmodule Eventful.Test.Model do
   alias __MODULE__.InternalEvent
 
   Transitions
-  |> governs(:current_state, on: Event)
+  |> governs(:current_state, on: Event, lock: :current_state_version)
 
   Publishings
   |> governs(:publish_state, on: Event)
@@ -25,7 +25,10 @@ defmodule Eventful.Test.Model do
 
   schema "models" do
     field(:publish_state, :string, default: "draft")
+
     field(:current_state, :string, default: "created")
+    field(:current_state_version, :integer, default: 0)
+
     field(:internal_state, :string, default: "created")
 
     has_many :events, __MODULE__.Event

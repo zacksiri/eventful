@@ -156,6 +156,8 @@ defmodule MyApp.Repo.Migrations.AddCurrentStateToPosts do
 end
 ```
 
+## Transitioning the State
+
 That's it! That's how your set up your first auditable state machine on your schema. You can how transition the post from state to state.
 
 ```
