@@ -53,7 +53,7 @@ defmodule Eventful.Transitable do
 
         schema "posts" do
           field :current_state, :string, default: "created"
-          field :current_state_versions, :integer, default: 0
+          field :current_state_version, :integer, default: 0
           
           field :visibility, :string, default: "private"
         end

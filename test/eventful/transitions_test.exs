@@ -139,7 +139,7 @@ defmodule Eventful.TransitionsTest do
                  comment: nil
                })
 
-      assert transitioned_model.current_state_versions == 1
+      assert transitioned_model.current_state_version == 1
 
       assert_raise(Ecto.StaleEntryError, fn ->
         Model.Event.handle(model, actor, %{
