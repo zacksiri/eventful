@@ -43,15 +43,18 @@ defmodule Eventful.Transitable do
         alias __MODULE__.Event
         alias __MODULE__.Transitions
         alias __MODULE__.Visibilities
-
+        
+        # You can optionally use locks
         Transitions
-        |> governs(:current_state, on: Event)
+        |> governs(:current_state, on: Event, lock: :current_state_versions)
 
         Visibilities
         |> governs(:visibility, on: Event)
 
         schema "posts" do
           field :current_state, :string, default: "created"
+          field :current_state_versions, :integer, default: 0
+          
           field :visibility, :string, default: "private"
         end
       end
@@ -78,7 +81,14 @@ defmodule Eventful.Transitable do
 
         @governors
         |> Enum.reduce(changeset, fn g, acc ->
-          validate_inclusion(acc, g.governs, g.module.valid_states())
+          changeset =
+            validate_inclusion(acc, g.governs, g.module.valid_states())
+
+          if lock_field = g.lock do
+            optimistic_lock(changeset, lock_field)
+          else
+            changeset
+          end
         end)
       end
     end
@@ -92,12 +102,14 @@ defmodule Eventful.Transitable do
   """
   defmacro governs(module, field, options) do
     on = Keyword.fetch!(options, :on)
+    lock = Keyword.get(options, :lock)
 
     quote do
       @governors %{
         module: unquote(module),
         governs: unquote(field),
-        via: unquote(on)
+        via: unquote(on),
+        lock: unquote(lock)
       }
     end
   end

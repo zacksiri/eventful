@@ -130,6 +130,27 @@ defmodule Eventful.TransitionsTest do
     end
   end
 
+  describe "transition with lock" do
+    test "failed because of stale entry", %{model: model, actor: actor} do
+      assert {:ok, %{resource: transitioned_model}} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "process",
+                 comment: nil
+               })
+
+      assert transitioned_model.current_state_versions == 1
+
+      assert_raise(Ecto.StaleEntryError, fn ->
+        Model.Event.handle(model, actor, %{
+          domain: "transitions",
+          name: "process",
+          comment: nil
+        })
+      end)
+    end
+  end
+
   describe "transitions" do
     test "get all transitions", %{model: _model} do
       assert Enum.count(Model.Transitions.all()) == 2
