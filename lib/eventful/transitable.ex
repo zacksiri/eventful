@@ -84,13 +84,18 @@ defmodule Eventful.Transitable do
           changeset =
             validate_inclusion(acc, g.governs, g.module.valid_states())
 
-          if lock_field = g.lock do
-            optimistic_lock(changeset, lock_field)
+          if state_field = get_change(changeset, g.governs) do
+            maybe_apply_lock(changeset, g.lock)
           else
             changeset
           end
         end)
       end
+
+      defp maybe_apply_lock(changeset, nil), do: changeset
+
+      defp maybe_apply_lock(changeset, field) when is_atom(field),
+        do: optimistic_lock(changeset, field)
     end
   end
 
