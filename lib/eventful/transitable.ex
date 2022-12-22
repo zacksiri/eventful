@@ -43,10 +43,10 @@ defmodule Eventful.Transitable do
         alias __MODULE__.Event
         alias __MODULE__.Transitions
         alias __MODULE__.Visibilities
-        
+
         # You can optionally use locks
         Transitions
-        |> governs(:current_state, on: Event, lock: :current_state_versions)
+        |> governs(:current_state, on: Event, lock: :current_state_version)
 
         Visibilities
         |> governs(:visibility, on: Event)
@@ -54,7 +54,7 @@ defmodule Eventful.Transitable do
         schema "posts" do
           field :current_state, :string, default: "created"
           field :current_state_version, :integer, default: 0
-          
+
           field :visibility, :string, default: "private"
         end
       end
@@ -84,19 +84,24 @@ defmodule Eventful.Transitable do
           changeset =
             validate_inclusion(acc, g.governs, g.module.valid_states())
 
-          if lock_field = g.lock do
-            optimistic_lock(changeset, lock_field)
+          if state_field = get_change(changeset, g.governs) do
+            maybe_apply_lock(changeset, g.lock)
           else
             changeset
           end
         end)
       end
+
+      defp maybe_apply_lock(changeset, nil), do: changeset
+
+      defp maybe_apply_lock(changeset, field) when is_atom(field),
+        do: optimistic_lock(changeset, field)
     end
   end
 
   @doc """
   The governs function allows you to define governance on each of your fields.
-    
+
       Transitions
       |> governs(:current_state, on: Event)
   """
