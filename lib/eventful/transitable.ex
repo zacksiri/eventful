@@ -43,10 +43,10 @@ defmodule Eventful.Transitable do
         alias __MODULE__.Event
         alias __MODULE__.Transitions
         alias __MODULE__.Visibilities
-        
+
         # You can optionally use locks
         Transitions
-        |> governs(:current_state, on: Event, lock: :current_state_versions)
+        |> governs(:current_state, on: Event, lock: :current_state_version)
 
         Visibilities
         |> governs(:visibility, on: Event)
@@ -54,7 +54,7 @@ defmodule Eventful.Transitable do
         schema "posts" do
           field :current_state, :string, default: "created"
           field :current_state_version, :integer, default: 0
-          
+
           field :visibility, :string, default: "private"
         end
       end
@@ -96,7 +96,7 @@ defmodule Eventful.Transitable do
 
   @doc """
   The governs function allows you to define governance on each of your fields.
-    
+
       Transitions
       |> governs(:current_state, on: Event)
   """
