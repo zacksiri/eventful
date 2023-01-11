@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :eventful, Eventful.Test.Repo,
   adapter: Ecto.Adapters.Postgres,

@@ -12,6 +12,6 @@ defmodule Eventful.Test.Model.InternalTransitions do
   Model
   |> transition(
     [from: "created", to: "active", via: "activate"],
-    fn changes -> transit(changes) end
+    fn changes -> transit(changes, Model.InternalTriggers) end
   )
 end
