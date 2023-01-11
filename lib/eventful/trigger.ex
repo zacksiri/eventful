@@ -6,11 +6,11 @@ defmodule Eventful.Trigger do
 
       defmodule MyApp.Post.Triggers do
         use Eventful.Trigger
-        
+
         alias MyApp.Post
-        
+
         Post
-        |> trigger([currently: "published"], fn event, post -> 
+        |> trigger([currently: "published"], fn event, post ->
           # add your code here.
         end)
       end
@@ -32,7 +32,7 @@ defmodule Eventful.Trigger do
   The trigger macro function allows you to define a trigger in your trigger module
 
       Post
-      |> trigger([currently: "published"], fn event, post -> 
+      |> trigger([currently: "published"], fn event, post ->
         # add your code here.
       end)
   """
@@ -41,7 +41,7 @@ defmodule Eventful.Trigger do
 
     quote do
       def call(_repo, %{
-            event: %unquote(module).Event{} = event,
+            event: %{} = event,
             resource:
               %unquote(module){@eventful_state => unquote(current_state)} =
                 resource

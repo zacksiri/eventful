@@ -6,36 +6,36 @@ defmodule Eventful.Transition do
 
       defmodule MyApp.Post.Transitions do
         use Eventful.Transition, repo: MyApp.Repo
-        
+
         @behaviour Eventful.Handler
-        
+
         alias MyApp.Post
-        
+
         Post
         |> transition([from: "created", to: "published", via: "publish", fn changes ->
           transit(changes)
         end)
-        
+
         Post
         |> transition([from: "created", to: "deleted", via: "delete", fn changes ->
           transit(changes)
         end)
       end
-      
+
   You can also define multiple state machines for example for a given `post` you can also have a machine for your `:visibility` field
 
       defmodule MyApp.Post.Visibilities do
         use Eventful.Transition, repo: MyApp.Repo, eventful_state: :visibility
-        
+
         @behaviour Eventful.Handler
-        
+
         alias MyApp.Post
-        
+
         Post
         |> transition([from: "private", to: "public", via: "publicize", fn changes ->
           transit(changes)
         end)
-        
+
         Post
         |> transition([from: "public", to: "private", via: "privatize", fn changes ->
           transit(changes)

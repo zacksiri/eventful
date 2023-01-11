@@ -13,28 +13,28 @@ defmodule Eventful do
           Post,
           User
         }
-        
+
         use Eventful,
           parent: {:post, Post},
           actor: {:user, User}
-          
+
         handle(:transitions, using: Post.Transitions)
       end
-      
-  You will need to define a `Transitions` module for `MyApp.Post` 
+
+  You will need to define a `Transitions` module for `MyApp.Post`
 
       defmodule MyApp.Post.Transitions do
         use Eventful.Transition, repo: MyApp.Repo
-        
+
         @behaviour Eventful.Handler
-        
+
         alias MyApp.Post
-        
+
         Post
         |> transition([from: "created", to: "published", via: "publish", fn changes ->
           transit(changes)
         end)
-        
+
         Post
         |> transition([from: "created", to: "deleted", via: "delete", fn changes ->
           transit(changes)
@@ -46,15 +46,15 @@ defmodule Eventful do
       defmodule MyApp.Post do
         use Ecto.Schema
         import Ecto.Changeset
-      
+
         use Eventful.Transitable
-      
+
         alias __MODULE__.Event
         alias __MODULE__.Transitions
-      
+
         Transitions
         |> governs(:current_state, on: Event)
-      
+
         schema "posts" do
           field :current_state, :string, default: "created"
         end
@@ -134,11 +134,11 @@ defmodule Eventful do
           Post,
           User
         }
-        
+
         use Eventful,
           parent: {:post, Post},
           actor: {:user, User}
-          
+
         handle(:transitions, using: Post.Transitions)
         handle(:visibilities, using: Post.Visibilities)
       end
