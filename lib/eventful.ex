@@ -85,7 +85,9 @@ defmodule Eventful do
         belongs_to(unquote(actor_relation), unquote(actor_module))
 
         field(:domain, :string)
-        field(:metadata, :map, default: %{})
+
+        embeds_one(:metadata, Eventful.Metadata)
+
         field(:name, :string)
 
         timestamps(type: :utc_datetime_usec)
@@ -94,7 +96,8 @@ defmodule Eventful do
       @doc false
       def changeset(%unquote(caller){} = event, attrs) do
         event
-        |> cast(attrs, [:name, :domain, :metadata])
+        |> cast(attrs, [:name, :domain])
+        |> cast_embed(:metadata)
         |> cast_assoc(unquote(parent_relation))
         |> cast_assoc(unquote(actor_relation))
         |> validate_required([
@@ -155,7 +158,13 @@ defmodule Eventful do
           ) do
         unquote(using).call(user, resource, event_params)
       rescue
-        FunctionClauseError -> {:error, :invalid_transition_event}
+        FunctionClauseError ->
+          {:error,
+           %Eventful.Error{
+             code: :invalid_transition_event,
+             message: "check parameters",
+             data: event_params
+           }}
       end
     end
   end

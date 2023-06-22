@@ -1,4 +1,6 @@
 defmodule Eventful.Transition do
+  defstruct [:event, :resource, :trigger]
+
   @moduledoc """
   This module providers the macros for building the transition modules
 
@@ -68,34 +70,69 @@ defmodule Eventful.Transition do
               | {:error, any, any, map}
 
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}) ::
-              {:ok, any()}
-              | {:error, any()}
-              | {:error, Ecto.Multi.name(), any(),
-                 %{required(Ecto.Multi.name()) => any()}}
+              {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
       def transit({changeset, event_changeset}) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
         |> Multi.update(:resource, changeset)
         |> unquote(repo).transaction(timeout: unquote(timeout))
+        |> case do
+          {:ok, transaction} ->
+            {:ok,
+             %Eventful.Transition{
+               event: transaction.event,
+               resource: transaction.resource
+             }}
+
+          {:error, :resource, message, data} ->
+            {:error,
+             %Eventful.Error{
+               code: :resource,
+               message: message,
+               data: data
+             }}
+
+          {:error, :event, message, data} ->
+            {:error,
+             %Eventful.Error{
+               code: :event,
+               message: message,
+               data: data
+             }}
+        end
       end
 
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}, atom) ::
-              {:ok, any()}
-              | {:error, any()}
-              | {:error, Ecto.Multi.name(), any(),
-                 %{required(Ecto.Multi.name()) => any()}}
+              {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
+
       def transit({changeset, event_changeset}, module) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
         |> Multi.update(:resource, changeset)
         |> Multi.run(:trigger, module, :call, [])
         |> unquote(repo).transaction(timeout: unquote(timeout))
+        |> case do
+          {:ok, transaction} ->
+            {:ok,
+             %Eventful.Transition{
+               event: transaction.event,
+               resource: transaction.resource,
+               trigger: transaction.trigger
+             }}
+
+          {:error, :trigger, message, data} ->
+            {:error,
+             %Eventful.Error{code: :trigger, message: message, data: data}}
+
+          {:error, :resource, message, data} ->
+            {:error,
+             %Eventful.Error{code: :resource, message: message, data: data}}
+
+          {:error, :event, message, data} ->
+            {:error,
+             %Eventful.Error{code: :event, message: message, data: data}}
+        end
       end
-
-      defp guard_transition(_resource, _actor, _event_name),
-        do: {:ok, :passed}
-
-      defoverridable guard_transition: 3
     end
   end
 
@@ -152,21 +189,29 @@ defmodule Eventful.Transition do
               resource,
             %{domain: unquote(caller), name: unquote(event_name)} = params
           ) do
-        with {:ok, :passed} <-
-               guard_transition(resource, actor, unquote(event_name)) do
-          governor =
-            Enum.find(unquote(module).governors(), fn governor ->
-              governor.module == unquote(caller_module)
-            end)
+        governor =
+          Enum.find(unquote(module).governors(), fn governor ->
+            governor.module == unquote(caller_module)
+          end)
 
-          resource
-          |> unquote(module).state_changeset(%{
-            @eventful_state => unquote(to_state)
-          })
-          |> governor.via.with_metadata(actor, resource, params)
-          |> unquote(expression).()
-        else
-          _ -> {:error, :guard_failed, resource}
+        resource
+        |> unquote(module).state_changeset(%{
+          @eventful_state => unquote(to_state)
+        })
+        |> governor.via.with_metadata(actor, resource, params)
+        |> unquote(expression).()
+        |> case do
+          {:ok, %Eventful.Transition{} = transition} ->
+            {:ok, transition}
+
+          {:error, %Eventful.Error{} = error} ->
+            {:error, error}
+
+          {:error, message} ->
+            {:error, %Eventful.Error{code: :transit, message: message}}
+
+          _ ->
+            raise Eventful.Exception.UnexpectedReturnValue
         end
       end
     end
