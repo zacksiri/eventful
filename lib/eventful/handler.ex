@@ -1,4 +1,4 @@
 defmodule Eventful.Handler do
-  @callback call(actor :: struct, resource :: struct, event_params :: map) ::
+  @callback call(struct, struct, map) ::
               {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
 end

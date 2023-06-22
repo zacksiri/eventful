@@ -1,4 +1,5 @@
 defmodule Eventful.Transition do
+  @enforce_keys [:event, :resource]
   defstruct [:event, :resource, :trigger]
 
   @moduledoc """
@@ -64,10 +65,7 @@ defmodule Eventful.Transition do
                       )
 
       @spec call(struct, map(), map()) ::
-              {:ok, any}
-              | {:error, any}
-              | {:error, atom, struct}
-              | {:error, any, any, map}
+              {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
 
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}) ::
               {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
@@ -83,6 +81,9 @@ defmodule Eventful.Transition do
                event: transaction.event,
                resource: transaction.resource
              }}
+
+          {:error, value} ->
+            {:error, %Eventful.Error{code: :transaction, message: value}}
 
           {:error, :resource, message, data} ->
             {:error,
@@ -119,6 +120,9 @@ defmodule Eventful.Transition do
                resource: transaction.resource,
                trigger: transaction.trigger
              }}
+
+          {:error, value} ->
+            {:error, %Eventful.Error{code: :transaction, message: value}}
 
           {:error, :trigger, message, data} ->
             {:error,
