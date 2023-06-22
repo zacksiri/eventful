@@ -76,6 +76,21 @@ defmodule Eventful.TransitionsTest do
       assert transaction.trigger == :something_got_triggered
     end
 
+    test "correctly capture trigger errors", %{model: model, actor: actor} do
+      Model.Event.handle(model, actor, %{
+        domain: "transitions",
+        name: "process"
+      })
+
+      model = Repo.get(Model, model.id)
+
+      assert {:error, %{code: :trigger, message: :something_went_wrong}} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "reject"
+               })
+    end
+
     test "can access events from model", %{model: model, actor: actor} do
       Model.Event.handle(model, actor, %{
         domain: "transitions",
@@ -89,6 +104,21 @@ defmodule Eventful.TransitionsTest do
 
       assert Enum.count(model.events) == 1
     end
+
+    test "can guard against changes", %{model: model, actor: actor} do
+      Model.Event.handle(model, actor, %{
+        domain: "transitions",
+        name: "process"
+      })
+
+      model = Repo.get(Model, model.id)
+
+      assert {:error, %{code: :transit}} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "pause"
+               })
+    end
   end
 
   describe "transition failure" do
@@ -96,7 +126,7 @@ defmodule Eventful.TransitionsTest do
       model: model,
       actor: actor
     } do
-      assert {:error, :invalid_transition_event} =
+      assert {:error, %{code: :invalid_transition_event}} =
                Model.Event.handle(model, actor, %{
                  domain: "transitions",
                  name: "weird"
@@ -126,7 +156,20 @@ defmodule Eventful.TransitionsTest do
                  comment: nil
                })
 
-      refute Map.has_key?(transaction.event.metadata, :comment)
+      refute transaction.event.metadata.comment
+    end
+  end
+
+  describe "transition with parameters" do
+    test "can transition with parameters", %{model: model, actor: actor} do
+      assert {:ok, transaction} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "process",
+                 parameters: %{"foo" => "bar"}
+               })
+
+      assert transaction.event.metadata.parameters == %{"foo" => "bar"}
     end
   end
 
@@ -153,7 +196,7 @@ defmodule Eventful.TransitionsTest do
 
   describe "transitions" do
     test "get all transitions", %{model: _model} do
-      assert Enum.count(Model.Transitions.all()) == 2
+      assert Enum.count(Model.Transitions.all()) == 4
     end
   end
 
@@ -162,7 +205,9 @@ defmodule Eventful.TransitionsTest do
       assert Enum.sort(Model.Transitions.valid_states()) == [
                "approved",
                "created",
-               "processing"
+               "paused",
+               "processing",
+               "rejected"
              ]
     end
   end
