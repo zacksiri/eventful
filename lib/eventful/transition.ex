@@ -2,6 +2,12 @@ defmodule Eventful.Transition do
   @enforce_keys [:event, :resource]
   defstruct [:event, :resource, :trigger]
 
+  @type t :: %__MODULE__{
+          event: struct,
+          resource: struct,
+          trigger: map | nil
+        }
+
   @moduledoc """
   This module providers the macros for building the transition modules
 
@@ -64,11 +70,8 @@ defmodule Eventful.Transition do
                         :current_state
                       )
 
-      @spec call(struct, map(), map()) ::
-              {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
-
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}) ::
-              {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
+              {:ok, any} | {:error, any}
       def transit({changeset, event_changeset}) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
@@ -82,30 +85,21 @@ defmodule Eventful.Transition do
                resource: transaction.resource
              }}
 
+          {:error, code, message, data} ->
+            {:error,
+             %Eventful.Error{
+               code: code,
+               message: message,
+               data: data
+             }}
+
           {:error, value} ->
             {:error, %Eventful.Error{code: :transaction, message: value}}
-
-          {:error, :resource, message, data} ->
-            {:error,
-             %Eventful.Error{
-               code: :resource,
-               message: message,
-               data: data
-             }}
-
-          {:error, :event, message, data} ->
-            {:error,
-             %Eventful.Error{
-               code: :event,
-               message: message,
-               data: data
-             }}
         end
       end
 
       @spec transit({Ecto.Changeset.t(), Ecto.Changeset.t()}, atom) ::
-              {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
-
+              {:ok, any} | {:error, any}
       def transit({changeset, event_changeset}, module) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
@@ -121,20 +115,11 @@ defmodule Eventful.Transition do
                trigger: transaction.trigger
              }}
 
+          {:error, code, message, data} ->
+            {:error, %Eventful.Error{code: code, message: message, data: data}}
+
           {:error, value} ->
             {:error, %Eventful.Error{code: :transaction, message: value}}
-
-          {:error, :trigger, message, data} ->
-            {:error,
-             %Eventful.Error{code: :trigger, message: message, data: data}}
-
-          {:error, :resource, message, data} ->
-            {:error,
-             %Eventful.Error{code: :resource, message: message, data: data}}
-
-          {:error, :event, message, data} ->
-            {:error,
-             %Eventful.Error{code: :event, message: message, data: data}}
         end
       end
     end
@@ -204,19 +189,6 @@ defmodule Eventful.Transition do
         })
         |> governor.via.with_metadata(actor, resource, params)
         |> unquote(expression).()
-        |> case do
-          {:ok, %Eventful.Transition{} = transition} ->
-            {:ok, transition}
-
-          {:error, %Eventful.Error{} = error} ->
-            {:error, error}
-
-          {:error, message} ->
-            {:error, %Eventful.Error{code: :transit, message: message}}
-
-          _ ->
-            raise Eventful.Exception.UnexpectedReturnValue
-        end
       end
     end
   end

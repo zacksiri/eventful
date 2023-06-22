@@ -15,16 +15,14 @@ defmodule MyApp.Post.Transitions do
   Post
   |> transition(
     [from: "draft", to: "published", via: "publish"],
-    fn changes -> transit(changes, Post.Triggers) end)
+    fn {post_changeset, _} = changes ->
+      if MyApp.check_something(post_changeset.data) do
+        transit(changes, Post.Triggers)
+      else
+        {:error, "guard failed"}
+      end
+    end)
   )
-
-  defp guard_transition(%Post{current_state: _current_state} = post, _user_, "publish") do
-    if MyApp.check_something(post),
-      do: {:ok, :passed},
-      else: {:error, :failed}
-  end
-
-  defp guard_transition(_post_, _user, _), do: {:ok, :passed}
 end
 ```
 
