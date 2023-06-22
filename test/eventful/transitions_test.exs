@@ -113,11 +113,13 @@ defmodule Eventful.TransitionsTest do
 
       model = Repo.get(Model, model.id)
 
-      assert {:error, %{code: :transit}} =
+      assert {:error, message} =
                Model.Event.handle(model, actor, %{
                  domain: "transitions",
                  name: "pause"
                })
+
+      assert message == "Cannot pause a model with version 2"
     end
   end
 
