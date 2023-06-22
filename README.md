@@ -11,7 +11,7 @@ You can add `eventful` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:eventful, "~> 2.0.0"}
+    {:eventful, "~> 3.0.0"}
   ]
 end
 ```
@@ -96,16 +96,16 @@ Next you'll need to define your `Transitions` this will allow you to define whic
 ```elixir
 defmodule MyApp.Post.Transitions do
   use Eventful.Transition, repo: MyApp.Repo
-  
+
   @behaviour Eventful.Handler
-  
+
   alias MyApp.Post
-  
+
   Post
   |> transition([from: "draft", to: "published", via: "publish", fn changes ->
     transit(changes)
   end)
-  
+
   Post
   |> transition([from: "published", to: "draft", via: "drafting", fn changes ->
     transit(changes)
@@ -118,19 +118,19 @@ Next you'll need to add some field to your `Post` schema which will be used to t
 ```elixir
 defmodule MyApp.Post do
   # ...
-  
+
   use Eventful.Transitable
-  
+
   alias __MODULE__.UserEvent
   alias __MODULE__.Transitions
-  
+
   Transitions
   |> governs(:current_state, on: UserEvent)
 
   schema "posts" do
     field :title, :string
     field :content, :string
-    
+
     field :current_state, :string, default: "draft"
   end
 
@@ -151,7 +151,7 @@ defmodule MyApp.Post.UserEvent do
     parent: {:post, Post},
     actor: {:user, User},
     table_name: "post_user_events"
-    
+
   handle(:transitions, using: Post.Transitions)
 end
 ```
@@ -166,7 +166,7 @@ defmodule MyApp.Repo.Migrations.AddCurrentStateToPosts do
     alter table(:posts) do
       add(:current_state, :citext, default: "draft", null: false)
     end
-    
+
     create(index(:posts, [:current_state]))
   end
 end
