@@ -1,4 +1,5 @@
 defmodule Eventful.Transition do
+  @enforce_keys [:event, :resource]
   defstruct [:event, :resource, :trigger]
 
   @moduledoc """
@@ -82,7 +83,7 @@ defmodule Eventful.Transition do
              }}
 
           {:error, value} ->
-            {:error, %Eventful.Error{code: :transaction, data: value}}
+            {:error, %Eventful.Error{code: :transaction, message: value}}
 
           {:error, :resource, message, data} ->
             {:error,
@@ -121,7 +122,7 @@ defmodule Eventful.Transition do
              }}
 
           {:error, value} ->
-            {:error, %Eventful.Error{code: :transaction, data: value}}
+            {:error, %Eventful.Error{code: :transaction, message: value}}
 
           {:error, :trigger, message, data} ->
             {:error,
