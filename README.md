@@ -154,6 +154,22 @@ defmodule MyApp.Post.UserEvent do
 
   handle(:transitions, using: Post.Transitions)
 end
+
+defimpl Eventful.Transit, for: MyApp.Post do
+  alias MyApp.Post.UserEvent
+
+  def create(resource, actor, event_name, options \\ []) do
+    comment = Keyword.get(options, :comment)
+    parameters = Keyword.get(options, :parameters)
+
+    UserEvent.handle(post, user, %{
+      domain: "transitions", 
+      event_name: event_name,
+      comment: comment,
+      parameters: parameters
+    })
+  end
+end
 ```
 
 You'll also need to add a migration for the post. You can use `:string` or if you prefer `:citext` for your `:current_state` field.
@@ -177,8 +193,7 @@ end
 That's it! That's how your set up your first auditable state machine on your schema. You can how transition the post from state to state.
 
 ```elixir
-{:ok, transition} =
-  MyApp.Post.UserEvent.handle(post, user, %{domain: "transitions", event_name: "publish"})
+{:ok, transition} = Eventful.Transit.perform(post, user, "publish")
 ```
 
 ## Copyright and License

@@ -31,17 +31,14 @@ defmodule Eventful.TransitionsTest do
   describe "transition successfully" do
     test "can transition", %{model: model, actor: actor} do
       assert {:ok, transaction} =
-               Model.Event.handle(model, actor, %{
-                 domain: "transitions",
-                 name: "process"
-               })
+               Eventful.Transit.perform(model, actor, "process")
 
       assert transaction.resource.current_state == "processing"
     end
 
     test "can transition using publishings", %{model: model, actor: actor} do
       assert {:ok, transaction} =
-               Model.Event.handle(model, actor, %{
+               Eventful.Transit.handle(model, actor, %{
                  domain: "publishings",
                  name: "publish"
                })
@@ -168,6 +165,7 @@ defmodule Eventful.TransitionsTest do
                Model.Event.handle(model, actor, %{
                  domain: "transitions",
                  name: "process",
+                 comment: "something",
                  parameters: %{"foo" => "bar"}
                })
 
