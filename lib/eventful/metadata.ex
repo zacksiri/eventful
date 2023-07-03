@@ -7,9 +7,9 @@ defmodule Eventful.Metadata do
 
   @primary_key false
   embedded_schema do
-    field :changes, :map
+    field :changes, :map, default: %{}
     field :comment, :string
-    field :parameters, :map
+    field :parameters, :map, default: %{}
   end
 
   @doc false
@@ -21,8 +21,8 @@ defmodule Eventful.Metadata do
   @spec build(any, any, map) :: %{:changes => any, optional(:comment) => any}
   def build(resource, changes, params) do
     params
-    |> starting_map()
-    |> maybe_merge_parameters()
+    |> maybe_merge(:comment)
+    |> maybe_merge(:parameters)
     |> Map.merge(%{changes: changed_attributes(resource, changes)})
   end
 
@@ -34,15 +34,9 @@ defmodule Eventful.Metadata do
     end)
   end
 
-  defp starting_map(params) do
-    if Map.has_key?(params, :comment) && not is_nil(params.comment),
-      do: %{comment: params.comment},
-      else: params
-  end
-
-  defp maybe_merge_parameters(params) do
-    if Map.has_key?(params, :parameters) && not is_nil(params.parameters),
-      do: Map.merge(params, %{parameters: params.parameters}),
+  defp maybe_merge(params, key) do
+    if Map.has_key?(params, key) && not is_nil(params[key]),
+      do: Map.merge(params, %{key => params[key]}),
       else: params
   end
 end
