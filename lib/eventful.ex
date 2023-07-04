@@ -61,12 +61,6 @@ defmodule Eventful do
       end
   """
 
-  defprotocol Activity do
-    @spec create(t, t, binary, Keyword.t()) ::
-            {:ok, %Eventful.Transition{}} | {:error, %Eventful.Error{}}
-    def create(resource, actor, event_name, options \\ [])
-  end
-
   defmacro __using__(options) do
     caller = __CALLER__.module
     binary_id = Keyword.get(options, :binary_id)
