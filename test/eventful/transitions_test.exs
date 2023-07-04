@@ -38,10 +38,9 @@ defmodule Eventful.TransitionsTest do
 
     test "can transition using publishings", %{model: model, actor: actor} do
       assert {:ok, transaction} =
-               Eventful.Transit.handle(model, actor, %{
-                 domain: "publishings",
-                 name: "publish"
-               })
+               Eventful.Transit.perform(model, actor, "publish",
+                 domain: "publishings"
+               )
 
       assert transaction.resource.publish_state == "published"
     end
