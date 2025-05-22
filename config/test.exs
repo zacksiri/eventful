@@ -12,4 +12,4 @@ config :eventful, Eventful.Test.Repo,
 config :eventful,
   ecto_repos: [Eventful.Test.Repo]
 
-config :logger, level: :warn
+config :logger, level: :warning

@@ -115,7 +115,7 @@ defmodule Eventful.TransitionsTest do
                  name: "pause"
                })
 
-      assert message == "Cannot pause a model with version 2"
+      assert message == "Cannot becaused current state version is 1"
     end
   end
 

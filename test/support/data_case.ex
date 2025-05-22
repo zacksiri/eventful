@@ -15,7 +15,7 @@ defmodule Eventful.DataCase do
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Eventful.Test.Repo)
 
-    unless tags[:async] do
+    if !tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(Eventful.Test.Repo, {:shared, self()})
     end
 
