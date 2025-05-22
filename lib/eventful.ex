@@ -67,6 +67,18 @@ defmodule Eventful do
     {parent_relation, parent_module} = Keyword.get(options, :parent)
     {actor_relation, actor_module} = Keyword.get(options, :actor)
 
+    binary_id_type =
+      cond do
+        binary_id && is_boolean(binary_id) ->
+          :binary_id
+
+        binary_id && is_atom(binary_id) && !is_boolean(binary_id) ->
+          binary_id
+
+        true ->
+          nil
+      end
+
     table_name =
       Keyword.get(options, :table_name) || "#{parent_relation}_events"
 
@@ -75,9 +87,9 @@ defmodule Eventful do
       import Ecto.Changeset
       import Eventful
 
-      if unquote(binary_id) do
-        @primary_key {:id, :binary_id, autogenerate: true}
-        @foreign_key_type :binary_id
+      if unquote(binary_id_type) do
+        @primary_key {:id, unquote(binary_id_type), autogenerate: true}
+        @foreign_key_type unquote(binary_id_type)
       end
 
       schema "#{unquote(table_name)}" do

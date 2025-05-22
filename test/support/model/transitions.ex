@@ -29,8 +29,8 @@ defmodule Eventful.Test.Model.Transitions do
   |> transition(
     [from: "processing", to: "paused", via: "pause"],
     fn {resource_changeset, _event_changeset} = changes ->
-      if resource_changeset.changes.current_state_version == 2 do
-        {:error, "Cannot pause a model with version 2"}
+      if resource_changeset.data.current_state_version == 1 do
+        {:error, "Cannot becaused current state version is 1"}
       else
         transit(changes)
       end
