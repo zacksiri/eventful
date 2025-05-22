@@ -7,7 +7,8 @@ config :eventful, Eventful.Test.Repo,
   hostname: System.get_env("POSTGRES_HOST") || "localhost",
   username: System.get_env("POSTGRES_USERNAME") || "zacksiri",
   password: System.get_env("POSTGRES_PASSWORD") || "",
-  priv: "test/support/"
+  priv: "test/support/",
+  ssl: false
 
 config :eventful,
   ecto_repos: [Eventful.Test.Repo]
