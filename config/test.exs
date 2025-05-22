@@ -2,7 +2,7 @@ import Config
 
 config :eventful, Eventful.Test.Repo,
   adapter: Ecto.Adapters.Postgres,
-  database: "eventful_test",
+  database: System.get_env("POSTGRES_DB") || "eventful_test",
   pool: Ecto.Adapters.SQL.Sandbox,
   hostname: System.get_env("POSTGRES_HOST") || "localhost",
   username: System.get_env("POSTGRES_USERNAME") || "zacksiri",

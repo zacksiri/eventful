@@ -2,7 +2,7 @@ defmodule Eventful.MixProject do
   @moduledoc false
   use Mix.Project
 
-  @version "3.2.0"
+  @version "3.2.1"
 
   def project do
     [
@@ -80,10 +80,8 @@ defmodule Eventful.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:jason, "~> 1.0"},
       {:postgrex, "~> 0.14", only: :test},
-      {:excoveralls, "~> 0.10", only: :test},
-      {:credo, "~> 1.1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 end

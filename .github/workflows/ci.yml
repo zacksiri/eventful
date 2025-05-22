@@ -1,17 +1,14 @@
 name: Elixir CI
 
-on: ['push', 'pull_request']
+on: ["push", "pull_request"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    container:
-      image: elixir:1.9.1-slim
-
     services:
       postgres:
-        image: postgres:11.5
+        image: postgres:15.6
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -23,6 +20,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - name: Setup elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: 1.16.3 # Define the elixir version [required]
+          otp-version: 26.2.5 # Define the OTP version [required]
       - name: Install Dependencies
         run: |
           export MIX_ENV=test
@@ -31,9 +33,10 @@ jobs:
           mix deps.get
       - name: Run Tests
         run: |
-          mix coveralls
+          mix test --trace --slowest 10
         env:
-          POSTGRES_HOST: postgres
+          POSTGRES_HOST: localhost
           POSTGRES_USERNAME: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: postgres
