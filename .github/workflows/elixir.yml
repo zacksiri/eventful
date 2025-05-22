@@ -1,13 +1,13 @@
 name: Elixir CI
 
-on: ['push', 'pull_request']
+on: ["push", "pull_request"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.9.1-slim
+      image: elixir:1.18.1-slim
 
     services:
       postgres:
