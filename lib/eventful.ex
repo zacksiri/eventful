@@ -72,7 +72,7 @@ defmodule Eventful do
         binary_id && is_boolean(binary_id) ->
           :binary_id
 
-        binary_id && is_atom(binary_id) && !is_boolean(binary_id) ->
+        binary_id && is_tuple(binary_id) ->
           binary_id
 
         true ->
