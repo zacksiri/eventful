@@ -33,7 +33,7 @@ jobs:
           mix deps.get
       - name: Run Tests
         run: |
-          mix test
+          mix test --trace --slowest 10
         env:
           POSTGRES_HOST: postgres
           POSTGRES_USERNAME: postgres
