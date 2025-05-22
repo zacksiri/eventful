@@ -6,12 +6,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    container:
-      image: elixir:1.18.1-slim
-
     services:
       postgres:
-        image: postgres:11.5
+        image: postgres:15.6
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -23,6 +20,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - name: Setup elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: 1.16.3 # Define the elixir version [required]
+          otp-version: 26.2.5 # Define the OTP version [required]
       - name: Install Dependencies
         run: |
           export MIX_ENV=test
