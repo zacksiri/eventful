@@ -183,13 +183,19 @@ defmodule Eventful.TransitionsTest do
 
       assert transitioned_model.current_state_version == 1
 
-      assert_raise(Ecto.StaleEntryError, fn ->
-        Model.Event.handle(model, actor, %{
-          domain: "transitions",
-          name: "process",
-          comment: nil
-        })
-      end)
+      assert {:error,
+              %Eventful.Error{
+                code: :resource,
+                message: %Ecto.Changeset{} = changeset
+              }} =
+               Model.Event.handle(model, actor, %{
+                 domain: "transitions",
+                 name: "process",
+                 comment: nil
+               })
+
+      assert {"is stale", [stale: true]} ==
+               Keyword.get(changeset.errors, :current_state)
     end
   end
 

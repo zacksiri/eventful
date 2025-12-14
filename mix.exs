@@ -2,7 +2,7 @@ defmodule Eventful.MixProject do
   @moduledoc false
   use Mix.Project
 
-  @version "3.2.2"
+  @version "3.3.0"
 
   def project do
     [

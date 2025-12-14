@@ -75,7 +75,9 @@ defmodule Eventful.Transition do
       def transit({changeset, event_changeset}) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
-        |> Multi.update(:resource, changeset)
+        |> Multi.update(:resource, changeset,
+          stale_error_field: @eventful_state
+        )
         |> unquote(repo).transaction(timeout: unquote(timeout))
         |> case do
           {:ok, transaction} ->
@@ -103,7 +105,9 @@ defmodule Eventful.Transition do
       def transit({changeset, event_changeset}, module) do
         Multi.new()
         |> Multi.insert(:event, event_changeset)
-        |> Multi.update(:resource, changeset)
+        |> Multi.update(:resource, changeset,
+          stale_error_field: @eventful_state
+        )
         |> Multi.run(:trigger, module, :call, [])
         |> unquote(repo).transaction(timeout: unquote(timeout))
         |> case do
