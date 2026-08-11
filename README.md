@@ -1,3 +1,5 @@
+
+
 # Eventful
 
 ![](https://github.com/zacksiri/eventful/workflows/Elixir%20CI/badge.svg) [![Hex.pm](https://img.shields.io/hexpm/v/eventful.svg)](https://hex.pm/packages/eventful) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/eventful)
@@ -84,8 +86,8 @@ defmodule MyApp.Repo.Migrations.CreatePostUserEvents do
       timestamps()
     end
 
-    create(index(:post_events, [:post_id]))
-    create(index(:post_events, [:user_id]))
+    create(index(:post_user_events, [:post_id]))
+    create(index(:post_user_events, [:user_id]))
   end
 end
 ```
